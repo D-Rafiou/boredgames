@@ -1,0 +1,3700 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#150d2b">
+<title>boredgames</title>
+<meta name="description" content="Tiny games for big boredom. Quick, free mini-games that run right in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E">
+<!-- Fonts are optional: if you're offline the page falls back to system fonts. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+
+<style>
+/* ==========================================================================
+   boredgames — styles
+   Colors and fonts live in :root so the whole look can be re-themed in one place.
+   ========================================================================== */
+:root {
+  --bg: #150d2b;
+  --panel: #261a4a;
+  --panel-deep: #1d1238;
+  --ink: #f6f1ff;
+  --muted: #bcaee0;
+  --line: #3d2d70;
+  --dark: #150d2b;
+
+  --pink: #ff4fa3;
+  --orange: #ff8a3d;
+  --lemon: #ffd93d;
+  --lime: #7bf26b;
+  --cyan: #2ee6d6;
+  --violet: #8b6cff;
+
+  --display: "Lilita One", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font: 600 16px/1.5 var(--body);
+  background-color: var(--bg);
+  /* soft glow at the top + a faint confetti-dot texture */
+  background-image:
+    radial-gradient(rgba(255,255,255,.08) 1.5px, transparent 2px),
+    radial-gradient(70% 45% at 50% 0%, rgba(139,108,255,.32), transparent 70%);
+  background-size: 30px 30px, auto;
+  background-repeat: repeat, no-repeat;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+/* ---------- Buttons ---------- */
+.btn, .icon-btn {
+  font: 400 18px/1 var(--display);
+  min-height: 48px;                      /* comfortable touch target */
+  color: var(--ink);
+  background: var(--panel);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 18px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 rgba(0,0,0,.45);
+  transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+  -webkit-user-select: none; user-select: none;
+}
+.btn:hover, .icon-btn:hover { filter: brightness(1.15); }
+.btn:active, .icon-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.45); }
+.btn:disabled, .icon-btn:disabled, .dpad button:disabled { opacity: .4; cursor: not-allowed; filter: none; transform: none; box-shadow: 0 5px 0 rgba(0,0,0,.45); }
+.btn-primary { background: var(--c, var(--lemon)); border-color: rgba(0,0,0,.25); color: var(--dark); }
+.btn-big { font-size: 24px; padding: 14px 34px; border-radius: 18px; }
+.icon-btn { padding: 10px 14px; min-width: 48px; font-size: 20px; }
+
+/* ==========================================================================
+   Home
+   ========================================================================== */
+.hero { position: relative; text-align: center; padding: 56px 16px 30px; }
+.hero .mute-btn { position: absolute; top: 14px; right: 14px; }
+
+.wordmark { margin: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 28px; }
+.word { display: flex; gap: 6px; }
+.tile {
+  --c: var(--pink); --r: 0deg;
+  display: grid; place-items: center;
+  width: clamp(42px, 8vw, 76px); aspect-ratio: 1;
+  border-radius: 20%;
+  background: var(--c); color: var(--dark);
+  font: 400 clamp(30px, 6vw, 56px)/1 var(--display);
+  box-shadow: 0 6px 0 rgba(0,0,0,.4), inset 0 -6px 0 rgba(0,0,0,.14);
+  transform: rotate(var(--r));
+  cursor: pointer; -webkit-user-select: none; user-select: none;
+  transition: transform .15s ease;
+}
+.tile:hover { transform: translateY(-4px) rotate(calc(var(--r) * -1)); }
+.tile.boing { animation: boing .5s ease; }
+@keyframes boing {
+  0%   { transform: scale(1, 1); }
+  25%  { transform: translateY(-24px) scale(.9, 1.12); }
+  55%  { transform: translateY(0) scale(1.14, .86); }
+  80%  { transform: scale(.97, 1.03); }
+  100% { transform: scale(1, 1); }
+}
+
+.tagline { margin: 22px 0 22px; font: 400 clamp(20px, 3.2vw, 28px)/1.2 var(--display); color: var(--ink); }
+
+.grid {
+  list-style: none; margin: 0 auto; padding: 12px 16px 28px; max-width: 1040px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 24px;
+}
+
+.card {
+  --c: var(--orange);
+  display: grid; grid-template-columns: auto 1fr; column-gap: 14px; row-gap: 2px; align-items: center;
+  padding: 16px;
+  background: var(--panel);
+  border: 3px solid var(--c);
+  border-radius: 20px;
+  color: inherit; text-decoration: none;
+  box-shadow: 6px 6px 0 var(--c);
+  transition: transform .14s ease, box-shadow .14s ease;
+}
+.card:hover, .card:focus-visible { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--c); }
+.card:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--c); }
+.card-emoji {
+  grid-row: 1 / span 2;
+  width: 64px; height: 64px; display: grid; place-items: center;
+  font-size: 36px; border-radius: 16px;
+  background: rgba(255,255,255,.08);
+  background: color-mix(in srgb, var(--c) 24%, transparent);
+}
+.card:hover .card-emoji { animation: wiggle .5s ease; }
+@keyframes wiggle { 0%,100% { transform: rotate(0) } 25% { transform: rotate(-12deg) scale(1.1) } 75% { transform: rotate(12deg) scale(1.1) } }
+.card-name { align-self: end; font: 400 24px/1.1 var(--display); }
+.card-desc { align-self: start; color: var(--muted); font-size: 15px; line-height: 1.35; }
+.card-best {
+  grid-column: 1 / -1; justify-self: start; margin-top: 12px;
+  display: inline-flex; gap: 8px; align-items: baseline;
+  padding: 4px 12px; border-radius: 999px;
+  background: rgba(0,0,0,.3); color: var(--muted);
+  font: 800 14px/1.4 var(--body);
+  font-variant-numeric: tabular-nums;
+}
+.card-best b { color: var(--c); font: 400 18px/1 var(--display); }
+
+.foot { text-align: center; color: var(--muted); font-size: 14px; padding: 8px 16px 40px; }
+
+/* ==========================================================================
+   Game view
+   ========================================================================== */
+.gv { --c: var(--orange); max-width: 760px; margin: 0 auto; padding: 14px 16px 36px; }
+.gv-top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-bottom: 14px; }
+.gv-title { flex: 1 1 auto; margin: 0; font: 400 26px/1.1 var(--display); text-align: center; }
+.gv-tools { display: flex; gap: 8px; }
+
+.hud { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; }
+.hud-item {
+  display: flex; align-items: baseline; gap: 8px; padding: 6px 14px; border-radius: 12px;
+  background: var(--panel-deep); border: 2px solid var(--line);
+}
+.hud-k { color: var(--muted); font-size: 14px; font-weight: 800; }
+.hud-v { font: 400 26px/1.1 var(--display); color: var(--c); font-variant-numeric: tabular-nums; }
+.hud-v.bump { animation: bump .25s ease; }
+@keyframes bump { 40% { transform: scale(1.3); } }
+.hud-info { display: flex; align-items: center; padding: 6px 14px; color: var(--ink); font-weight: 800; min-height: 40px; }
+.hud-info:empty { display: none; }
+
+/* The stage keeps the game's aspect ratio and never grows taller than the screen.
+   --chrome = space taken by the header above it; --extra = controls below it (set by JS). */
+.gv { --chrome: 250px; }
+.stage {
+  position: relative;
+  width: min(100%, max(240px, calc((100vh - var(--chrome) - var(--extra, 0px)) * var(--ar))));
+  width: min(100%, max(240px, calc((100dvh - var(--chrome) - var(--extra, 0px)) * var(--ar))));
+  aspect-ratio: var(--ar);
+  margin: 0 auto;
+  border: 4px solid var(--c);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #120b26;
+  box-shadow: 0 0 0 4px #0c0618, 0 18px 40px rgba(0,0,0,.5), 0 0 40px color-mix(in srgb, var(--c) 30%, transparent);
+  -webkit-user-select: none; user-select: none;
+}
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+
+.overlay {
+  position: absolute; inset: 0; display: grid; place-items: center; padding: 14px;
+  background: rgba(14, 8, 32, .8);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+}
+.panel { text-align: center; max-width: 340px; animation: pop .22s ease; }
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+.panel-emoji { font-size: 54px; line-height: 1.1; }
+.panel h3 { margin: 4px 0 6px; font: 400 clamp(28px, 6vw, 38px)/1.1 var(--display); }
+.panel-blurb { margin: 0 0 6px; font-weight: 800; }
+.panel-help { margin: 0 0 18px; color: var(--muted); font-size: 15px; line-height: 1.4; }
+.panel-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.final { display: flex; justify-content: center; align-items: baseline; gap: 10px; margin: 6px 0; }
+.final span { color: var(--muted); font-weight: 800; }
+.final b { font: 400 56px/1 var(--display); color: var(--c); font-variant-numeric: tabular-nums; }
+.badge {
+  display: inline-block; margin: 0 0 18px; padding: 4px 14px; border-radius: 999px;
+  background: var(--lemon); color: var(--dark); font: 400 18px/1.4 var(--display);
+  animation: pop .4s ease;
+}
+
+.gv-extra { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; }
+.gv-extra:empty { display: none; }
+.gv-help { max-width: 520px; margin: 14px auto 0; text-align: center; color: var(--muted); font-size: 14px; }
+
+/* On-screen arrows: only on touch devices */
+.dpad { display: none; grid-template: repeat(2, 64px) / repeat(3, 64px); gap: 6px; }
+@media (pointer: coarse) { .dpad { display: grid; } }
+.dpad button {
+  font-size: 24px; color: var(--ink); background: var(--panel); border: 3px solid var(--line); border-radius: 16px;
+  box-shadow: 0 4px 0 rgba(0,0,0,.45); touch-action: none; -webkit-user-select: none; user-select: none;
+}
+.dpad button:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.45); }
+.dpad [data-d="up"]    { grid-area: 1 / 2; }
+.dpad [data-d="left"]  { grid-area: 2 / 1; }
+.dpad [data-d="down"]  { grid-area: 2 / 2; }
+.dpad [data-d="right"] { grid-area: 2 / 3; }
+
+.hud-vs { display: flex; gap: 8px; }
+.hud-p {
+  --pc: var(--pink);
+  display: flex; align-items: baseline; gap: 8px; padding: 6px 16px; border-radius: 12px;
+  background: var(--panel-deep); border: 2px solid var(--pc);
+  color: var(--muted); font-weight: 800; font-size: 14px;
+}
+.hud-p b { font: 400 26px/1.1 var(--display); color: var(--pc); font-variant-numeric: tabular-nums; }
+.hud-p b.bump { animation: bump .25s ease; }
+.final.vs b { color: inherit; }
+
+.group-head { grid-column: 1 / -1; margin: 18px 0 -4px; }
+.group-head:first-child { margin-top: 0; }
+.group-head h2 { margin: 0; font: 400 24px/1.2 var(--display); }
+.group-head p { margin: 0; color: var(--muted); font-size: 14px; }
+.card-foot { grid-column: 1 / -1; margin-top: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-foot .card-best { margin-top: 0; }
+.card-tag {
+  padding: 3px 10px; border-radius: 999px; border: 2px solid var(--c); color: var(--ink);
+  font: 800 12px/1.4 var(--body); white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .hero { padding-top: 64px; }
+  /* phones: one slim header row + one slim score row so the board gets the space */
+  .gv { --chrome: 132px; padding: 10px 16px 28px; }
+  .gv-title { display: none; }                         /* the start screen already shows the game's name */
+  .gv-top { flex-wrap: nowrap; justify-content: space-between; margin-bottom: 10px; }
+  .gv-top .btn, .gv-top .icon-btn { padding: 10px 14px; font-size: 16px; }
+  .hud { flex-wrap: nowrap; gap: 6px; margin-bottom: 10px; }
+  .hud-item { padding: 3px 10px; }
+  .hud-v, .hud-p b { font-size: 22px; }
+  .hud-p { padding: 3px 12px; }
+  .hud-info { padding: 3px 4px; font-size: 14px; white-space: nowrap; min-height: 0; }
+  .gv-extra { margin-top: 12px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+
+<body>
+<div id="home">
+  <header class="hero">
+    <button class="icon-btn mute-btn" type="button"></button>
+    <h1 class="wordmark" id="wordmark" aria-label="boredgames"></h1>
+    <p class="tagline">Tiny games for big boredom.</p>
+    <button class="btn btn-primary btn-big" id="randomBtn" type="button">🎲 Random game</button>
+  </header>
+  <main><ul class="grid" id="grid"></ul></main>
+  <p class="foot">High scores are saved in this browser.</p>
+</div>
+
+<div id="gameView" hidden></div>
+
+<script>
+'use strict';
+/* ==========================================================================
+   boredgames
+   --------------------------------------------------------------------------
+   HOW THE CODE IS ORGANIZED
+     1. Utilities          small helpers (random, clamp, rounded rects…)
+     2. Store / Scores     localStorage wrapper that never throws
+     3. Sound              Web Audio sound effects + mute
+     4. Particles          tiny confetti helper that games can share
+     5. Arena              the shared game "shell": canvas, HUD, start / pause /
+                           game-over screens, input, and the game loop
+     6. Games              one registerGame({...}) block per game
+     7. Home + router      the card grid, Random button and #/game-id routing
+
+   HOW TO ADD A NEW GAME
+     Copy any block in section 6 and call registerGame with:
+       id, name, emoji, color, blurb (card text), help (how to play),
+       size: [width, height]   the game's internal canvas size in pixels
+       create(api)             returns an object with these methods:
+         reset()               set up a fresh round (called before every play)
+         update(dt)            advance the game by dt seconds
+         draw(ctx)             paint one frame
+         (optional) idle(dt), keydown(e), pointerdown(p), pointermove(p),
+                    pointerup(p), destroy()
+     The api passed to create() gives you:
+         api.W, api.H, api.input, api.sound
+         api.setScore(n), api.addScore(n), api.setInfo(text)
+         api.end(optionalTitle)         → shows the game-over screen
+         api.addAction(label, fn)       → extra button under the game
+         api.addDpad(fn)                → on-screen arrows for touch devices
+     The card on the home page, high score saving, pause, and the start and
+     game-over screens all come for free.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. Utilities
+   ========================================================================== */
+const $ = (sel, root = document) => root.querySelector(sel);
+const rand = (a, b) => a + Math.random() * (b - a);
+const randInt = (a, b) => Math.floor(rand(a, b + 1));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/** Path a rounded rectangle (works in every browser, unlike ctx.roundRect). */
+function rr(ctx, x, y, w, h, r) {
+  r = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+/** Draw text on a canvas in the display font. */
+function label(ctx, text, x, y, size, color, align = 'center', alpha = 1) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = `400 ${size}px "Lilita One", "Arial Rounded MT Bold", system-ui, sans-serif`;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = color;
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+
+/* ==========================================================================
+   2. Store / Scores — localStorage that fails quietly
+   (private windows or blocked storage fall back to memory for the session)
+   ========================================================================== */
+const Store = (() => {
+  const mem = {};
+  let ls = null;
+  try { ls = window.localStorage; ls.setItem('__t', '1'); ls.removeItem('__t'); } catch (e) { ls = null; }
+  return {
+    get(k) {
+      try { if (ls) return ls.getItem(k); } catch (e) { /* fall through */ }
+      return k in mem ? mem[k] : null;
+    },
+    set(k, v) {
+      mem[k] = String(v);
+      try { if (ls) ls.setItem(k, String(v)); } catch (e) { /* memory copy still works */ }
+    },
+  };
+})();
+
+const Scores = {
+  key: id => `boredgames:best:${id}`,
+  get(id) {
+    const n = parseInt(Store.get(this.key(id)), 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  },
+  /** Save a score if it's a new best. Returns { best, isNew }. lower = true for games where a smaller number wins. */
+  submit(id, score, lower = false) {
+    const prev = this.get(id), s = Math.floor(score);
+    const isNew = lower ? (prev === 0 || s < prev) : s > prev;
+    if (isNew) Store.set(this.key(id), s);
+    return { best: isNew ? s : prev, isNew };
+  },
+};
+
+/** How many 2-player matches have been finished (shown on the card, since 2-player games have no personal best). */
+const Plays = {
+  key: id => `boredgames:plays:${id}`,
+  get(id) { const n = parseInt(Store.get(this.key(id)), 10); return Number.isFinite(n) && n > 0 ? n : 0; },
+  inc(id) { Store.set(this.key(id), this.get(id) + 1); },
+};
+
+
+/* ==========================================================================
+   3. Sound — tiny synthesized effects, no audio files
+   ========================================================================== */
+const Sound = (() => {
+  let ac = null;
+  let muted = Store.get('boredgames:muted') === '1';
+  const lastPlayed = {};
+  const listeners = [];
+
+  function ctx() {
+    if (!ac) {
+      try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; }
+    }
+    if (ac.state === 'suspended') ac.resume();
+    return ac;
+  }
+
+  /** One short beep. f = start Hz, to = end Hz (slide), t = seconds, delay = seconds. */
+  function tone({ f, to, t = 0.1, type = 'square', v = 0.1, delay = 0 }) {
+    const c = ctx(); if (!c) return;
+    const t0 = c.currentTime + delay;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(f, t0);
+    if (to) osc.frequency.exponentialRampToValueAtTime(to, t0 + t);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(v, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + t);
+    osc.connect(g); g.connect(c.destination);
+    osc.start(t0); osc.stop(t0 + t + 0.03);
+  }
+
+  const arp = (notes, step, opts) => notes.forEach((f, i) => tone({ f, delay: i * step, ...opts }));
+  const PENTA = [262, 294, 330, 392, 440, 523, 587, 659, 784, 880];
+
+  // Each effect is a function so it can take one number (pitch, intensity…).
+  const effects = {
+    click:    () => tone({ f: 520, to: 780, t: 0.07, v: 0.07 }),
+    paddle:   () => tone({ f: 200, to: 320, t: 0.08, type: 'square', v: 0.09 }),
+    wall:     () => tone({ f: 160, to: 130, t: 0.05, type: 'triangle', v: 0.08 }),
+    brick:    row => tone({ f: 420 + (row || 0) * 45, to: 700 + (row || 0) * 60, t: 0.08, type: 'square', v: 0.07 }),
+    tink:     () => tone({ f: 900, t: 0.05, type: 'sine', v: 0.09 }),
+    launch:   () => tone({ f: 260, to: 720, t: 0.14, type: 'square', v: 0.08 }),
+    lose:     () => tone({ f: 420, to: 70, t: 0.45, type: 'sawtooth', v: 0.09 }),
+    levelup:  () => arp([523, 659, 784, 1047], 0.09, { t: 0.12, type: 'square', v: 0.07 }),
+    eat:      () => tone({ f: 600, to: 1000, t: 0.08, type: 'square', v: 0.07 }),
+    drop:     () => tone({ f: rand(260, 360), to: 150, t: 0.1, type: 'sine', v: 0.1 }),
+    thud:     speed => tone({ f: rand(120, 170), to: 60, t: 0.09, type: 'sine', v: clamp((speed || 300) / 2500, 0.03, 0.12) }),
+    tick:     () => tone({ f: rand(700, 900), to: 500, t: 0.03, type: 'triangle', v: 0.04 }),
+    shake:    () => tone({ f: 120, to: 60, t: 0.25, type: 'sawtooth', v: 0.06 }),
+    gameover: () => arp([392, 330, 262], 0.16, { t: 0.2, type: 'triangle', v: 0.1 }),
+    newbest:  () => arp([523, 659, 784, 1047, 1319], 0.1, { t: 0.14, type: 'square', v: 0.07 }),
+    note:     i => tone({ f: PENTA[(i || 0) % PENTA.length] * 2, t: 0.3, type: 'triangle', v: 0.13 }),
+    win:      () => arp([523, 659, 784, 1047, 784, 1047], 0.09, { t: 0.14, type: 'square', v: 0.07 }),
+    goal:     () => arp([392, 523, 659, 784], 0.08, { t: 0.14, type: 'square', v: 0.08 }),
+    pop:      () => tone({ f: 500, to: 900, t: 0.06, type: 'sine', v: 0.1 }),
+    buzz:     () => tone({ f: 170, to: 110, t: 0.28, type: 'sawtooth', v: 0.09 }),
+    flap:     () => tone({ f: 320, to: 560, t: 0.07, type: 'square', v: 0.06 }),
+    whack:    () => tone({ f: 260, to: 70, t: 0.12, type: 'triangle', v: 0.14 }),
+    gold:     () => arp([880, 1175, 1568], 0.06, { t: 0.1, type: 'square', v: 0.07 }),
+    flip:     () => tone({ f: 700, to: 500, t: 0.04, type: 'sine', v: 0.07 }),
+    match:    () => arp([659, 880], 0.08, { t: 0.12, type: 'triangle', v: 0.1 }),
+    peg:      () => tone({ f: rand(900, 1500), t: 0.03, type: 'sine', v: 0.04 }),
+    beep:     () => tone({ f: 440, t: 0.1, type: 'sine', v: 0.1 }),
+    go:       () => tone({ f: 880, t: 0.18, type: 'square', v: 0.09 }),
+    simon:    i => tone({ f: [330, 262, 392, 523][(i || 0) % 4], t: 0.34, type: 'sine', v: 0.16 }),
+    kick:     () => tone({ f: 180, to: 90, t: 0.1, type: 'triangle', v: 0.13 }),
+    tap:      () => tone({ f: 600, to: 760, t: 0.04, type: 'square', v: 0.05 }),
+  };
+
+  return {
+    /** Browsers only allow audio after a tap/click/key, so we wake it up on the first one. */
+    unlock() { ctx(); },
+    play(name, arg) {
+      if (muted || !effects[name]) return;
+      const now = performance.now();
+      if (now - (lastPlayed[name] || 0) < 35) return;   // stop rapid repeats from piling up
+      lastPlayed[name] = now;
+      try { effects[name](arg); } catch (e) { /* audio is never worth crashing a game */ }
+    },
+    isMuted: () => muted,
+    toggleMute() {
+      muted = !muted;
+      Store.set('boredgames:muted', muted ? '1' : '0');
+      listeners.forEach(fn => fn(muted));
+      if (!muted) this.play('click');
+    },
+    onChange(fn) { listeners.push(fn); },
+  };
+})();
+
+['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
+  document.addEventListener(ev, () => Sound.unlock(), { passive: true }));
+
+/** Keep every mute button (home + game view) showing the same state. */
+function refreshMuteButtons() {
+  const m = Sound.isMuted();
+  document.querySelectorAll('.mute-btn').forEach(b => {
+    b.textContent = m ? '🔇' : '🔊';
+    b.setAttribute('aria-label', m ? 'Unmute sound' : 'Mute sound');
+    b.setAttribute('aria-pressed', String(m));
+    b.title = m ? 'Unmute' : 'Mute';
+  });
+}
+Sound.onChange(refreshMuteButtons);
+document.addEventListener('click', e => {
+  if (e.target.closest('.mute-btn')) Sound.toggleMute();
+});
+
+
+/* ==========================================================================
+   4. Particles — a few flying squares for juice
+   ========================================================================== */
+function makeParticles() {
+  const list = [];
+  return {
+    burst(x, y, color, n = 10, speed = 200) {
+      for (let i = 0; i < n; i++) {
+        const life = rand(0.3, 0.7);
+        list.push({ x, y, vx: rand(-1, 1) * speed, vy: rand(-1, 1) * speed, life, max: life, size: rand(2, 5), color });
+      }
+    },
+    update(dt) {
+      for (let i = list.length - 1; i >= 0; i--) {
+        const p = list[i];
+        p.life -= dt;
+        if (p.life <= 0) { list.splice(i, 1); continue; }
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 420 * dt;
+      }
+    },
+    draw(ctx) {
+      for (const p of list) {
+        ctx.globalAlpha = clamp(p.life / p.max, 0, 1);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size);
+      }
+      ctx.globalAlpha = 1;
+    },
+    clear() { list.length = 0; },
+  };
+}
+
+
+/* ==========================================================================
+   5. Arena — the shared shell every game plays inside
+   Builds the game screen, runs the loop, and owns the state machine:
+       start → playing ⇄ paused → over → (play again) → playing …
+
+   A game can be 1-player (default), 2-player (def.players = 2) or both
+   (def.players = 'both': the start screen asks "1 player or 2 players?").
+   Solo games report a score; 2-player games report a winner.
+   ========================================================================== */
+function createArena(def, root, { onExit }) {
+  const [W, H] = def.size;
+  const SCALE = clamp(window.devicePixelRatio || 1, 1, 2);   // sharper canvas on retina screens
+  const players = def.players || 1;                          // 1 | 2 | 'both'
+  const scoring = def.scoring || {};                         // e.g. { lower: true, unit: ' ms' }
+  const unit = scoring.unit || '';
+  const P1C = def.p1Color || '#ff4fa3', P2C = def.p2Color || '#2ee6d6';
+
+  root.innerHTML = `
+    <div class="gv" style="--c:${def.color}">
+      <div class="gv-top">
+        <button class="btn" type="button" data-act="back">← Back to games</button>
+        <h2 class="gv-title"><span aria-hidden="true">${def.emoji}</span> ${def.name}</h2>
+        <div class="gv-tools">
+          <button class="btn" type="button" data-act="pause" title="Pause (P)">Pause</button>
+          <button class="icon-btn mute-btn" type="button"></button>
+        </div>
+      </div>
+      <div class="hud">
+        <div class="hud-item" data-el="scoreBox"><span class="hud-k">Score</span><span class="hud-v" data-el="score">0</span></div>
+        <div class="hud-item" data-el="bestBox"><span class="hud-k">Best</span><span class="hud-v" data-el="best">0</span></div>
+        <div class="hud-vs" data-el="vs" hidden>
+          <span class="hud-p" style="--pc:${P1C}">Player 1 <b data-el="s1">0</b></span>
+          <span class="hud-p" style="--pc:${P2C}">Player 2 <b data-el="s2">0</b></span>
+        </div>
+        <div class="hud-info" data-el="info"></div>
+      </div>
+      <div class="stage" style="--ar:${W / H}">
+        <canvas width="${W * SCALE}" height="${H * SCALE}" aria-label="${def.name} game board"></canvas>
+        <div class="overlay" data-el="overlay"></div>
+      </div>
+      <div class="gv-extra" data-el="extra"></div>
+      <p class="gv-help">${def.help}</p>
+    </div>`;
+  refreshMuteButtons();
+
+  const q = name => root.querySelector(`[data-el="${name}"]`);
+  const canvas = root.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = q('score'), bestEl = q('best'), infoEl = q('info'), overlay = q('overlay'), extra = q('extra');
+  const s1El = q('s1'), s2El = q('s2');
+  const pauseBtn = root.querySelector('[data-act="pause"]');
+  const helpEl = root.querySelector('.gv-help');
+  const stage = root.querySelector('.stage');
+
+  // ----- state -----
+  let state = 'start';            // 'start' | 'playing' | 'paused' | 'over'
+  let mode = players === 2 ? '2p' : '1p';
+  let score = 0;
+  let best = Scores.get(def.id);
+  let s1 = 0, s2 = 0, scoresSet = false;       // live 2-player scoreboard
+  const series = { a: 0, b: 0 };               // wins this visit (resets when you leave the game)
+  let raf = 0, lastT = null, overTimer = 0, game = null, sawTouch = false;
+  const coarse = window.matchMedia && matchMedia('(pointer: coarse)');
+  const input = { keys: new Set(), ptr: { x: W / 2, y: H / 2, down: false, inside: false } };
+
+  // ----- the api each game receives -----
+  const api = {
+    W, H, input, sound: Sound,
+    get mode() { return mode; },                              // '1p' or '2p'
+    get score() { return score; },
+    isTouch() { return sawTouch || !!(coarse && coarse.matches); },
+    setScore(n) { score = Math.max(0, Math.floor(n)); renderScore(); },
+    addScore(n) { api.setScore(score + n); },
+    /** 2-player scoreboard (goals, rounds won…). */
+    setScores(a, b) {
+      const bumpA = a !== s1, bumpB = b !== s2;
+      s1 = a; s2 = b; scoresSet = true;
+      s1El.textContent = a; s2El.textContent = b;
+      for (const [on, el] of [[bumpA, s1El], [bumpB, s2El]]) if (on) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+    },
+    setInfo(text) { if (infoEl.textContent !== text) infoEl.textContent = text; },
+    /** Solo games: show the game-over screen with the score. */
+    end(title) { endGame(title); },
+    /** 2-player games: winner is 1, 2, or 0 for a draw. */
+    endMatch(winner, detail) { endMatch(winner, detail); },
+    addAction(text, fn) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn'; b.textContent = text;
+      b.addEventListener('click', e => { if (state === 'playing') fn(); if (e.detail > 0) b.blur(); });
+      extra.appendChild(b);
+    },
+    addDpad(fn) {
+      const d = document.createElement('div');
+      d.className = 'dpad';
+      d.innerHTML = '<button type="button" data-d="up" aria-label="Up">▲</button><button type="button" data-d="left" aria-label="Left">◀</button><button type="button" data-d="down" aria-label="Down">▼</button><button type="button" data-d="right" aria-label="Right">▶</button>';
+      d.addEventListener('pointerdown', e => {
+        const b = e.target.closest('[data-d]');
+        if (!b) return;
+        e.preventDefault();
+        if (state === 'playing') fn(b.dataset.d);
+      });
+      extra.appendChild(d);
+    },
+  };
+
+  // ----- HUD -----
+  const fmt = n => (scoring.lower && n === 0) ? '–' : n + unit;
+  function renderScore() {
+    scoreEl.textContent = fmt(score);
+    scoreEl.classList.remove('bump'); void scoreEl.offsetWidth; scoreEl.classList.add('bump');
+  }
+  function applyMode() {
+    const two = mode === '2p';
+    q('scoreBox').hidden = two; q('bestBox').hidden = two; q('vs').hidden = !two || def.scoreboard === false;
+  }
+  bestEl.textContent = fmt(best);
+  applyMode();
+
+  // ----- overlays (start / paused / game over) -----
+  function showOverlay(html) {
+    overlay.innerHTML = `<div class="panel">${html}</div>`;
+    overlay.hidden = false;
+    const primary = overlay.querySelector('[data-focus]');
+    if (primary) primary.focus({ preventScroll: true });
+  }
+  function showStart() {
+    const buttons = players === 'both'
+      ? `<div class="panel-actions">
+           <button class="btn btn-primary btn-big" type="button" data-act="play" data-mode="1p" data-focus>1 player</button>
+           <button class="btn btn-big" type="button" data-act="play" data-mode="2p">2 players</button>
+         </div>`
+      : `<button class="btn btn-primary btn-big" type="button" data-act="play" data-focus>Play</button>`;
+    showOverlay(`
+      <div class="panel-emoji" aria-hidden="true">${def.emoji}</div>
+      <h3>${def.name}</h3>
+      <p class="panel-blurb">${def.blurb}</p>
+      <p class="panel-help">${def.help}</p>
+      ${buttons}`);
+  }
+  function showPaused() {
+    showOverlay(`
+      <h3>Paused</h3>
+      <p class="panel-help">Your game is waiting.</p>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-big" type="button" data-act="resume" data-focus>Resume</button>
+        <button class="btn" type="button" data-act="back">Back to games</button>
+      </div>`);
+  }
+  function showGameOver(title, isNew) {
+    showOverlay(`
+      <h3>${title}</h3>
+      <div class="final"><span>Score</span><b>${fmt(score)}</b></div>
+      ${isNew ? '<p class="badge">New best!</p>' : (best > 0 ? `<p class="panel-help">Best: ${fmt(best)}</p>` : '<p class="panel-help"></p>')}
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-big" type="button" data-act="play" data-mode="${mode}" data-focus>Play again</button>
+        <button class="btn" type="button" data-act="back">Back to games</button>
+      </div>`);
+  }
+  function showMatchOver(winner, detail) {
+    const col = winner === 1 ? P1C : winner === 2 ? P2C : '#ffd93d';
+    const title = winner === 0 ? 'It’s a draw!' : `Player ${winner} wins!`;
+    showOverlay(`
+      <h3 style="color:${col}">${title}</h3>
+      ${detail ? `<p class="panel-blurb">${detail}</p>` : ''}
+      ${scoresSet ? `<div class="final vs"><b style="color:${P1C}">${s1}</b><span>to</span><b style="color:${P2C}">${s2}</b></div>` : ''}
+      <p class="panel-help">Series: Player 1 ${series.a}, Player 2 ${series.b}</p>
+      <div class="panel-actions">
+        <button class="btn btn-primary btn-big" type="button" data-act="play" data-mode="${mode}" data-focus>Play again</button>
+        <button class="btn" type="button" data-act="back">Back to games</button>
+      </div>`);
+  }
+
+  // ----- state transitions -----
+  function setPauseIcon() {
+    const canPause = state === 'playing' || state === 'paused';
+    pauseBtn.disabled = !canPause;
+    pauseBtn.textContent = state === 'paused' ? 'Resume' : 'Pause';
+    extra.querySelectorAll('button').forEach(b => { b.disabled = state !== 'playing'; });   // Shake, Done, arrows…
+    helpEl.hidden = state === 'start';          // the start screen already shows how to play
+  }
+  function startGame(chosen) {
+    clearTimeout(overTimer);
+    if (chosen === '1p' || chosen === '2p') mode = chosen;
+    else if (players !== 'both') mode = players === 2 ? '2p' : '1p';
+    applyMode();
+    score = 0; renderScore();
+    s1 = 0; s2 = 0; scoresSet = false; s1El.textContent = 0; s2El.textContent = 0;
+    game.reset();
+    state = 'playing';
+    overlay.hidden = true;
+    lastT = null;
+    setPauseIcon();
+  }
+  function pauseGame() {
+    if (state !== 'playing') return;
+    state = 'paused'; showPaused(); setPauseIcon();
+  }
+  function resumeGame() {
+    if (state !== 'paused') return;
+    state = 'playing'; overlay.hidden = true; lastT = null; setPauseIcon();
+  }
+  function endGame(title) {
+    if (state !== 'playing') return;
+    state = 'over';
+    setPauseIcon();
+    const res = score > 0 ? Scores.submit(def.id, score, !!scoring.lower) : { best, isNew: false };
+    best = res.best; bestEl.textContent = fmt(best);
+    Sound.play(res.isNew ? 'newbest' : 'gameover');
+    // brief beat so you can see what happened before the screen covers it
+    overTimer = setTimeout(() => showGameOver(title || 'Game over', res.isNew), 550);
+  }
+  function endMatch(winner, detail) {
+    if (state !== 'playing') return;
+    state = 'over';
+    setPauseIcon();
+    if (winner === 1) series.a++; else if (winner === 2) series.b++;
+    Plays.inc(def.id);
+    Sound.play('win');
+    overTimer = setTimeout(() => showMatchOver(winner, detail), 700);
+  }
+
+  // ----- clicks on any [data-act] button inside the arena -----
+  function onClick(e) {
+    const b = e.target.closest('[data-act]');
+    if (!b || !root.contains(b)) return;
+    if (e.detail > 0 && (b === pauseBtn)) b.blur();       // don't leave focus on a button that Space would re-trigger
+    switch (b.dataset.act) {
+      case 'play':   Sound.play('click'); startGame(b.dataset.mode); break;
+      case 'resume': Sound.play('click'); resumeGame(); break;
+      case 'pause':  state === 'paused' ? resumeGame() : pauseGame(); break;
+      case 'back':   Sound.play('click'); onExit(); break;
+    }
+  }
+  root.addEventListener('click', onClick);
+
+  // ----- pointer input (mouse + touch + pen all go through Pointer Events) -----
+  // Every callback gets the pointer event too, so a game can tell fingers apart with e.pointerId.
+  function toLocal(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+  }
+  canvas.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse') sawTouch = true;
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* not fatal */ }
+    const p = toLocal(e);
+    Object.assign(input.ptr, p, { down: true, inside: true });
+    if (state === 'playing' && game.pointerdown) game.pointerdown(p, e);
+  });
+  canvas.addEventListener('pointermove', e => {
+    const p = toLocal(e);
+    Object.assign(input.ptr, p, { inside: true });
+    if (state === 'playing' && game.pointermove) game.pointermove(p, e);
+  });
+  const pointerEnd = e => {
+    const p = toLocal(e);
+    input.ptr.down = false;
+    if (e.pointerType !== 'mouse') input.ptr.inside = false;
+    if (state === 'playing' && game.pointerup) game.pointerup(p, e);
+  };
+  canvas.addEventListener('pointerup', pointerEnd);
+  canvas.addEventListener('pointercancel', pointerEnd);
+  canvas.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') input.ptr.inside = false; });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  // ----- keyboard input -----
+  const GAME_KEYS = new Set(['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ']);
+  function onKeyDown(e) {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    input.keys.add(k);
+    if (k === 'p' || k === 'escape') {
+      if (state === 'playing') pauseGame(); else if (state === 'paused') resumeGame();
+      return;
+    }
+    if (state !== 'playing') return;
+    if (GAME_KEYS.has(k)) e.preventDefault();             // keep arrows/space from scrolling the page
+    if (game.keydown && !e.repeat) game.keydown(e, k);
+  }
+  function onKeyUp(e) { input.keys.delete(e.key.toLowerCase()); }
+  function onBlur() { input.keys.clear(); }
+  function onVisibility() { if (document.hidden) pauseGame(); }
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
+  window.addEventListener('blur', onBlur);
+  document.addEventListener('visibilitychange', onVisibility);
+
+  // ----- game loop -----
+  function frame(t) {
+    raf = requestAnimationFrame(frame);
+    if (lastT == null) lastT = t;
+    const dt = Math.min((t - lastT) / 1000, 0.05);          // cap so a lag spike can't teleport things
+    lastT = t;
+
+    if (state === 'playing') game.update(dt);
+    else if ((state === 'start' || state === 'over') && game.idle) game.idle(dt);
+
+    ctx.setTransform(SCALE, 0, 0, SCALE, 0, 0);
+    ctx.fillStyle = '#120b26';
+    ctx.fillRect(0, 0, W, H);
+    game.draw(ctx);
+  }
+
+  // Reserve room for controls under the board (Snake's arrows, Ball Pit's buttons) so they stay on screen.
+  function fitExtra() {
+    const h = extra.offsetHeight;
+    stage.style.setProperty('--extra', h ? `${h + 16}px` : '0px');
+  }
+  window.addEventListener('resize', fitExtra);
+
+  // ----- go -----
+  game = def.create(api);
+  fitExtra();
+  game.reset();                       // so the start screen has a board behind it
+  setPauseIcon();
+  showStart();
+  raf = requestAnimationFrame(frame);
+
+  return {
+    /** Tear everything down so nothing keeps running after "Back to games". */
+    destroy() {
+      cancelAnimationFrame(raf);
+      clearTimeout(overTimer);
+      // leaving mid-game still counts for solo games that count upward: save the score you earned
+      if ((state === 'playing' || state === 'paused') && score > 0 && mode === '1p' && !scoring.lower) Scores.submit(def.id, score);
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', onBlur);
+      window.removeEventListener('resize', fitExtra);
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (game && game.destroy) game.destroy();
+      root.removeEventListener('click', onClick);
+      root.innerHTML = '';
+    },
+  };
+}
+
+
+/**
+ * On-canvas touch buttons that work with several fingers at once (handy for 2-player games on one phone).
+ * Call down/move/up from the game's pointer handlers, then read isDown(id) / pressed(id) in update().
+ *   buttons: [{ id, x, y, w, h, label, color, flip }]   (logical canvas coordinates; flip = text upside down for the player across the table)
+ * Buttons are only drawn on touch devices; on desktop the keyboard hints do that job.
+ */
+function makeTouchPad(api, buttons) {
+  const held = new Map();                 // pointerId -> button id
+  const edge = new Set();                 // ids pressed since the last pressed() check
+  const hit = p => buttons.find(b => p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h);
+  const press = (pid, b) => { held.set(pid, b.id); edge.add(b.id); };
+  const pad = {
+    down(p, e) { const b = hit(p); if (b) { press(e.pointerId, b); return true; } return false; },
+    move(p, e) {
+      if (!held.has(e.pointerId)) return;
+      const b = hit(p);
+      if (!b) held.delete(e.pointerId); else if (b.id !== held.get(e.pointerId)) press(e.pointerId, b);
+    },
+    up(p, e) { held.delete(e.pointerId); },
+    isDown(id) { for (const v of held.values()) if (v === id) return true; return false; },
+    pressed(id) { const had = edge.has(id); edge.delete(id); return had; },
+    reset() { held.clear(); edge.clear(); },
+    draw(ctx) {
+      if (!api.isTouch()) return;
+      for (const b of buttons) {
+        const on = pad.isDown(b.id);
+        ctx.globalAlpha = on ? 0.95 : 0.55;
+        ctx.fillStyle = b.color || '#8b6cff';
+        rr(ctx, b.x, b.y, b.w, b.h, 16); ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.save();
+        ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+        if (b.flip) ctx.rotate(Math.PI);
+        label(ctx, b.label, 0, 2, Math.min(34, b.h * 0.5), '#150d2b');
+        ctx.restore();
+      }
+    },
+  };
+  return pad;
+}
+
+
+/* ==========================================================================
+   6. Games
+   ========================================================================== */
+const GAMES = [];
+function registerGame(def) { GAMES.push(def); }
+
+
+/* --------------------------------------------------------------------------
+   Brick Breaker
+   Clear every brick. Each level adds rows, speeds the ball up and narrows the
+   paddle; from level 3 the top rows take two hits.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'brick-breaker',
+  group: 'balls',
+  name: 'Brick Breaker',
+  emoji: '🧱',
+  color: '#ff8a3d',
+  blurb: 'Smash every brick with one bouncy ball.',
+  help: 'Move the paddle with your mouse, your finger, or the ← → keys. Click, tap, or press Space to launch the ball.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const COLS = 8, MARGIN = 20, GAP = 6, TOP = 70;
+    const BW = (W - MARGIN * 2 - GAP * (COLS - 1)) / COLS;
+    const BH = 20;
+    const R = 7;                                   // ball radius
+    const ROW_COLORS = ['#ff4fa3', '#ff8a3d', '#ffd93d', '#7bf26b', '#2ee6d6', '#8b6cff', '#ff4fa3', '#ff8a3d'];
+    const paddle = { x: W / 2, y: H - 48, w: 92, h: 12 };
+    const particles = makeParticles();
+
+    let bricks, ball, level, lives, stuck, bricksLeft, bricksTotal, banner;
+
+    const baseSpeed = () => Math.min(620, 380 + (level - 1) * 30);
+    // the ball also speeds up as the level empties out (up to +35%)
+    const currentSpeed = () => Math.min(760, baseSpeed() * (1 + 0.35 * (1 - bricksLeft / bricksTotal)));
+
+    function updateInfo() { api.setInfo(`Level ${level}   ${'❤️'.repeat(lives)}`); }
+
+    function buildLevel() {
+      const rows = Math.min(2 + level, 8);                            // 3 rows to start, up to 8
+      const hardRows = level >= 3 ? Math.min(level - 2, 3) : 0;      // top rows that take 2 hits
+      const holeChance = Math.min(0.04 * (level - 1), 0.16);          // a few gaps on later levels
+      bricks = [];
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < COLS; c++) {
+          if (level > 1 && Math.random() < holeChance) continue;
+          bricks.push({
+            x: MARGIN + c * (BW + GAP), y: TOP + r * (BH + GAP), row: r,
+            hp: r < hardRows ? 2 : 1, color: ROW_COLORS[r % ROW_COLORS.length], alive: true,
+          });
+        }
+      }
+      bricksLeft = bricksTotal = bricks.length;
+      paddle.w = Math.max(64, 92 - (level - 1) * 4);
+      paddle.x = clamp(paddle.x, paddle.w / 2, W - paddle.w / 2);
+    }
+
+    function parkBall() {
+      stuck = true;
+      ball = { x: paddle.x, y: paddle.y - paddle.h / 2 - R - 1, vx: 0, vy: 0 };
+    }
+
+    function launch() {
+      if (!stuck) return;
+      stuck = false;
+      const a = rand(-0.35, 0.35);                 // slightly off-vertical
+      const s = currentSpeed();
+      ball.vx = Math.sin(a) * s; ball.vy = -Math.cos(a) * s;
+      api.sound.play('launch');
+    }
+
+    function loseLife() {
+      lives--;
+      api.sound.play('lose');
+      updateInfo();
+      if (lives <= 0) { api.end('Out of lives'); return; }
+      parkBall();
+    }
+
+    function levelClear() {
+      level++;
+      api.addScore(100);
+      api.sound.play('levelup');
+      buildLevel(); parkBall(); updateInfo();
+      banner = { text: `Level ${level}`, t: 1.4 };
+    }
+
+    function damage(b) {
+      b.hp--;
+      if (b.hp > 0) { api.sound.play('tink'); return; }
+      b.alive = false; bricksLeft--;
+      api.addScore(10 * level);
+      api.sound.play('brick', b.row);
+      particles.burst(b.x + BW / 2, b.y + BH / 2, b.color, 10);
+      if (bricksLeft === 0) levelClear();
+    }
+
+    /** Circle-vs-rectangle test against every live brick; bounce off the first one touched. */
+    function hitBricks() {
+      for (const b of bricks) {
+        if (!b.alive) continue;
+        const cx = clamp(ball.x, b.x, b.x + BW), cy = clamp(ball.y, b.y, b.y + BH);
+        const dx = ball.x - cx, dy = ball.y - cy;
+        if (dx * dx + dy * dy >= R * R) continue;
+        if (dx === 0 && dy === 0) {
+          ball.vy = -ball.vy;                        // centre is inside the brick: just flip
+        } else {
+          const d = Math.sqrt(dx * dx + dy * dy), nx = dx / d, ny = dy / d;
+          ball.x += nx * (R - d); ball.y += ny * (R - d);   // push out
+          const dot = ball.vx * nx + ball.vy * ny;
+          if (dot < 0) { ball.vx -= 2 * dot * nx; ball.vy -= 2 * dot * ny; }  // reflect
+        }
+        damage(b);
+        return true;
+      }
+      return false;
+    }
+
+    function moveBall(dt) {
+      // keep the speed exactly where we want it, and never let the ball go (almost) flat
+      const s = currentSpeed();
+      if (Math.abs(ball.vy) < s * 0.22) ball.vy = (ball.vy < 0 ? -1 : 1) * s * 0.22;
+      const m = Math.hypot(ball.vx, ball.vy) || 1;
+      ball.vx = ball.vx / m * s; ball.vy = ball.vy / m * s;
+
+      // move in small steps so a fast ball can't skip through a brick
+      const steps = Math.max(1, Math.ceil(s * dt / 4)), h = dt / steps;
+      for (let i = 0; i < steps; i++) {
+        ball.x += ball.vx * h; ball.y += ball.vy * h;
+
+        if (ball.x < R)       { ball.x = R;       ball.vx =  Math.abs(ball.vx); api.sound.play('wall'); }
+        else if (ball.x > W - R) { ball.x = W - R; ball.vx = -Math.abs(ball.vx); api.sound.play('wall'); }
+        if (ball.y < R)       { ball.y = R;       ball.vy =  Math.abs(ball.vy); api.sound.play('wall'); }
+
+        // paddle: where the ball lands decides the angle (edges = steeper)
+        if (ball.vy > 0 && ball.y < paddle.y && ball.y + R >= paddle.y - paddle.h / 2 &&
+            Math.abs(ball.x - paddle.x) <= paddle.w / 2 + R) {
+          const off = clamp((ball.x - paddle.x) / (paddle.w / 2), -1, 1);
+          const ang = off * 1.05;                                   // up to ~60° from vertical
+          ball.vx = Math.sin(ang) * s; ball.vy = -Math.cos(ang) * s;
+          ball.y = paddle.y - paddle.h / 2 - R;
+          api.sound.play('paddle');
+        }
+
+        if (hitBricks() && stuck) return;          // level cleared during this step
+        if (ball.y - R > H) { loseLife(); return; }
+      }
+    }
+
+    return {
+      reset() {
+        level = 1; lives = 3; banner = null;
+        paddle.x = api.input.ptr.inside ? clamp(api.input.ptr.x, 46, W - 46) : W / 2;
+        buildLevel(); parkBall(); particles.clear(); updateInfo();
+      },
+
+      update(dt) {
+        const k = api.input.keys;
+        const dir = (k.has('arrowright') || k.has('d') ? 1 : 0) - (k.has('arrowleft') || k.has('a') ? 1 : 0);
+        paddle.x = clamp(paddle.x + dir * 560 * dt, paddle.w / 2, W - paddle.w / 2);
+        if (stuck) { ball.x = paddle.x; ball.y = paddle.y - paddle.h / 2 - R - 1; }
+        else moveBall(dt);
+        particles.update(dt);
+        if (banner) { banner.t -= dt; if (banner.t <= 0) banner = null; }
+      },
+
+      idle(dt) { particles.update(dt); },
+
+      keydown(e, k) { if (k === ' ' || k === 'arrowup' || k === 'w') launch(); },
+      pointerdown(p) { paddle.x = clamp(p.x, paddle.w / 2, W - paddle.w / 2); launch(); },
+      pointermove(p) { paddle.x = clamp(p.x, paddle.w / 2, W - paddle.w / 2); },
+
+      draw(ctx) {
+        // bricks
+        for (const b of bricks) {
+          if (!b.alive) continue;
+          ctx.fillStyle = b.color; rr(ctx, b.x, b.y, BW, BH, 5); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.3)'; rr(ctx, b.x + 2, b.y + 2, BW - 4, 5, 3); ctx.fill();
+          if (b.hp > 1) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; rr(ctx, b.x + 1, b.y + 1, BW - 2, BH - 2, 5); ctx.stroke(); }
+        }
+        // paddle
+        ctx.shadowColor = '#ff8a3d'; ctx.shadowBlur = 14;
+        ctx.fillStyle = '#ffb066'; rr(ctx, paddle.x - paddle.w / 2, paddle.y - paddle.h / 2, paddle.w, paddle.h, 6); ctx.fill();
+        ctx.shadowBlur = 0;
+        // ball
+        ctx.shadowColor = '#fff'; ctx.shadowBlur = 12;
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ball.x, ball.y, R, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+
+        particles.draw(ctx);
+
+        if (stuck) label(ctx, 'Tap or press Space to launch', W / 2, H * 0.62, 22, '#fff', 'center', 0.6 + 0.4 * Math.sin(performance.now() / 250));
+        if (banner) label(ctx, banner.text, W / 2, H * 0.5, 54, '#ffd93d', 'center', clamp(banner.t, 0, 1));
+      },
+    };
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Ball Pit
+   A toy sandbox. Click (or hold and drag) to drop balls. Your score is how many
+   you drop before the pile stays above the red line for 2 seconds. The balls
+   get bigger as you go, so the pit fills faster and faster.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'ball-pit',
+  group: 'balls',
+  name: 'Ball Pit',
+  emoji: '🎱',
+  color: '#2ee6d6',
+  blurb: 'Drop balls and watch them pile up.',
+  help: 'Click or tap to drop a ball. Hold and drag to pour. Keep the pile below the red line, or press Done when you’ve had enough.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const LINE = 130;                    // the "full" line
+    const GRAVITY = 1500;
+    const SUBSTEPS = 6;                  // physics steps per frame (smaller steps = steadier piles)
+    const ITERATIONS = 4;                // how many times each step re-separates touching balls
+    const E_WALL = 0.55, E_BALL = 0.45;  // bounciness
+    const BOUNCE_MIN = 150;              // gentler contacts don't bounce, so piles settle instead of fizzing
+    const MAX_SPEED = 1100;
+    const COLORS = ['#ff4fa3', '#ff8a3d', '#ffd93d', '#7bf26b', '#2ee6d6', '#8b6cff'];
+
+    let balls, sorted, dropped, dropCooldown, fullTimer, nextR;
+    const impacts = [];                  // fast ball-vs-ball hits found this step, used for bouncing
+
+    function chooseNextRadius() {
+      // balls creep up in size as the game goes on, so the pit fills faster
+      nextR = rand(10, 16) + Math.min(10, dropped / 20);
+    }
+
+    /** Drop a ball at x. Returns false if something is already sitting in the way. */
+    function drop(x) {
+      const r = nextR, bx = clamp(x, r, W - r), by = r + 6;
+      for (const b of balls) {
+        const dx = b.x - bx, dy = b.y - by, rs = b.r + r;
+        if (dx * dx + dy * dy < rs * rs) return false;
+      }
+      const ball = { x: bx, y: by, px: bx, py: by, vx: rand(-40, 40), vy: 320, r, im: 1 / (r * r), hitX: 0, hitF: 0, color: pick(COLORS) };
+      balls.push(ball); sorted.push(ball);
+      dropped++;
+      api.setScore(dropped);
+      api.sound.play('drop');
+      dropCooldown = Math.max(0.1, (2 * r + 6) / 380);   // bigger balls need a little more room between drops
+      chooseNextRadius();
+      return true;
+    }
+
+    function impact(speed) { if (speed > BOUNCE_MIN) api.sound.play('thud', speed); }
+
+    /**
+     * One physics step (position-based, which keeps big piles calm):
+     *   1. apply gravity and move every ball
+     *   2. push overlapping balls apart (a few passes) and keep them inside the walls
+     *   3. work out each ball's velocity from how far it actually moved
+     *   4. add bounce back in for fast impacts only
+     */
+    function physicsStep(h) {
+      const drag = 1 - 0.3 * h;
+      for (const b of balls) {
+        b.px = b.x; b.py = b.y;
+        b.vy += GRAVITY * h; b.vx *= drag; b.vy *= drag;
+        b.x += b.vx * h; b.y += b.vy * h;
+        b.hitX = 0; b.hitF = 0;
+      }
+
+      // keep `sorted` ordered by x (insertion sort: it's nearly sorted already, so this is cheap).
+      // That lets the pair loop below stop early instead of checking every pair of balls.
+      for (let i = 1; i < sorted.length; i++) {
+        const k = sorted[i]; let j = i - 1;
+        while (j >= 0 && sorted[j].x > k.x) { sorted[j + 1] = sorted[j]; j--; }
+        sorted[j + 1] = k;
+      }
+
+      impacts.length = 0;
+      for (let it = 0; it < ITERATIONS; it++) {
+        for (const b of balls) {
+          if (b.x < b.r)          { if (!b.hitX) b.hitX = b.vx; b.x = b.r; }
+          else if (b.x > W - b.r) { if (!b.hitX) b.hitX = b.vx; b.x = W - b.r; }
+          if (b.y > H - b.r)      { if (!b.hitF) b.hitF = b.vy; b.y = H - b.r; }
+          if (b.y < b.r) b.y = b.r;                                  // a ceiling, so nothing flies out of view
+        }
+        for (let i = 0; i < sorted.length; i++) {
+          const a = sorted[i];
+          for (let j = i + 1; j < sorted.length; j++) {
+            const c = sorted[j], rs = a.r + c.r, dx = c.x - a.x;
+            if (dx > rs) break;                                        // everything further right is too far away
+            const dy = c.y - a.y, d2 = dx * dx + dy * dy;
+            if (d2 >= rs * rs) continue;
+            let nx = 1, ny = 0, d = 0;
+            if (d2 > 1e-8) { d = Math.sqrt(d2); nx = dx / d; ny = dy / d; }
+            if (it === 0) {
+              const vn = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;       // negative = moving toward each other
+              if (vn < -BOUNCE_MIN) impacts.push({ a, c, nx, ny, vn });
+            }
+            const corr = (rs - d) / (a.im + c.im);                       // lighter balls get pushed further
+            a.x -= nx * corr * a.im; a.y -= ny * corr * a.im;
+            c.x += nx * corr * c.im; c.y += ny * corr * c.im;
+          }
+        }
+      }
+      for (const b of balls) {                                         // final hard stop at the walls
+        b.x = clamp(b.x, b.r, W - b.r); b.y = clamp(b.y, b.r, H - b.r);
+      }
+
+      for (const b of balls) {
+        b.vx = (b.x - b.px) / h; b.vy = (b.y - b.py) / h;
+        const sp = Math.hypot(b.vx, b.vy);
+        if (sp > MAX_SPEED) { b.vx *= MAX_SPEED / sp; b.vy *= MAX_SPEED / sp; }
+        if (b.hitF > BOUNCE_MIN)        { b.vy = -b.hitF * E_WALL; impact(b.hitF); }
+        if (Math.abs(b.hitX) > BOUNCE_MIN) { b.vx = -b.hitX * E_WALL; impact(Math.abs(b.hitX)); }
+      }
+      for (const { a, c, nx, ny, vn } of impacts) {
+        const cur = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+        const target = -E_BALL * vn;                                    // bounce back at a fraction of the impact speed
+        if (cur < target) {
+          const j = (target - cur) / (a.im + c.im);
+          a.vx -= j * a.im * nx; a.vy -= j * a.im * ny;
+          c.vx += j * c.im * nx; c.vy += j * c.im * ny;
+          if (vn < -320) api.sound.play('tick');
+        }
+      }
+    }
+
+    // Buttons under the board (added once, when the game is created)
+    api.addAction('Shake it 🫨', () => ballPit.shake());
+    api.addAction('Done', () => api.end('All done!'));
+
+    const ballPit = {
+      reset() {
+        balls = []; sorted = []; dropped = 0; dropCooldown = 0; fullTimer = 0;
+        chooseNextRadius();
+        api.setInfo('Pile 0%');
+      },
+
+      update(dt) {
+        const ptr = api.input.ptr;
+        dropCooldown -= dt;
+        if (ptr.down && dropCooldown <= 0) drop(ptr.x);                // hold to pour
+
+        for (let s = 0; s < SUBSTEPS; s++) physicsStep(dt / SUBSTEPS);
+
+        // How high is the pile, and is a *resting* ball above the line?
+        let top = H, tooHigh = false;
+        for (const b of balls) {
+          const slow = b.vx * b.vx + b.vy * b.vy < 2500;
+          if (slow) top = Math.min(top, b.y - b.r);
+          if (slow && b.y - b.r < LINE) tooHigh = true;
+        }
+        api.setInfo(`Pile ${Math.round(clamp((H - top) / (H - LINE), 0, 1) * 100)}%`);
+
+        fullTimer = tooHigh ? fullTimer + dt : Math.max(0, fullTimer - dt * 2);
+        if (fullTimer >= 2) api.end('The pit is full!');
+      },
+
+      pointerdown(p) { if (dropCooldown <= 0) drop(p.x); },            // a quick tap drops a ball right away
+
+      draw(ctx) {
+        // the "full" line: dashed, and it pulses red as the countdown runs
+        const danger = clamp(fullTimer / 2, 0, 1);
+        ctx.save();
+        ctx.setLineDash([12, 10]);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = danger > 0 ? `rgba(255, 79, 109, ${0.55 + 0.45 * Math.sin(performance.now() / 70)})` : 'rgba(255, 79, 109, .45)';
+        ctx.beginPath(); ctx.moveTo(0, LINE); ctx.lineTo(W, LINE); ctx.stroke();
+        ctx.restore();
+        label(ctx, 'keep the pile below this line', W - 10, LINE - 14, 15, 'rgba(255,255,255,.4)', 'right');
+
+        // balls
+        for (const b of balls) {
+          ctx.fillStyle = b.color;
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.35)';
+          ctx.beginPath(); ctx.arc(b.x - b.r * 0.32, b.y - b.r * 0.32, b.r * 0.28, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // ghost of the next ball under your mouse
+        const ptr = api.input.ptr;
+        if (ptr.inside) {
+          ctx.globalAlpha = 0.35; ctx.fillStyle = '#fff';
+          ctx.beginPath(); ctx.arc(clamp(ptr.x, nextR, W - nextR), nextR + 6, nextR, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        if (balls.length === 0) label(ctx, 'Click to drop a ball', W / 2, H / 2, 26, '#fff', 'center', 0.5);
+
+        // countdown bar when the pile is too high
+        if (danger > 0) {
+          ctx.fillStyle = 'rgba(255, 79, 109, .9)';
+          ctx.fillRect(0, LINE + 4, W * danger, 5);
+        }
+      },
+
+      // used by the "Shake it" button
+      shake() {
+        for (const b of balls) { b.vx += rand(-450, 450); b.vy -= rand(250, 650); }
+        api.sound.play('shake');
+      },
+    };
+    return ballPit;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Snake
+   Eat the apples, don't hit the walls or yourself. Every apple adds 10 points,
+   makes you longer, and speeds the snake up a little.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'snake',
+  group: 'quick',
+  name: 'Snake',
+  emoji: '🐍',
+  color: '#7bf26b',
+  blurb: 'Eat, grow, and try not to crash.',
+  help: 'Steer with the arrow keys or WASD. On a phone, swipe on the board or use the arrows below.',
+  size: [480, 480],
+
+  create(api) {
+    const { W } = api;
+    const N = 20, CELL = W / N;
+    const DIRS = { up: { x: 0, y: -1 }, down: { x: 0, y: 1 }, left: { x: -1, y: 0 }, right: { x: 1, y: 0 } };
+    const KEYS = { arrowup: 'up', w: 'up', arrowdown: 'down', s: 'down', arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right' };
+    const particles = makeParticles();
+
+    let snake, dir, queue, food, acc, eaten, dead, t = 0, swipe = null;
+
+    const interval = () => Math.max(0.07, 0.16 - eaten * 0.003);   // seconds per move: gets faster
+
+    function turn(name) {
+      const d = DIRS[name]; if (!d) return;
+      const last = queue.length ? queue[queue.length - 1] : dir;
+      if (d.x === last.x && d.y === last.y) return;                // already going that way
+      if (d.x === -last.x && d.y === -last.y) return;              // no instant U-turns
+      if (queue.length < 2) queue.push(d);                         // remember a quick double-tap
+    }
+
+    function placeFood() {
+      const free = [];
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        if (!snake.some(s => s.x === x && s.y === y)) free.push({ x, y });
+      }
+      food = free.length ? pick(free) : null;
+    }
+
+    function die(title) {
+      if (dead) return;
+      dead = true;
+      api.sound.play('lose');
+      particles.burst(snake[0].x * CELL + CELL / 2, snake[0].y * CELL + CELL / 2, '#7bf26b', 24, 260);
+      api.end(title);
+    }
+
+    function step() {
+      if (queue.length) dir = queue.shift();
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+      if (head.x < 0 || head.y < 0 || head.x >= N || head.y >= N) return die('Hit the wall!');
+
+      const eating = food && head.x === food.x && head.y === food.y;
+      const body = eating ? snake : snake.slice(0, -1);            // the tail moves out of the way unless we grow
+      if (body.some(s => s.x === head.x && s.y === head.y)) return die('Ate yourself!');
+
+      snake.unshift(head);
+      if (eating) {
+        eaten++;
+        api.addScore(10);
+        api.sound.play('eat');
+        particles.burst(head.x * CELL + CELL / 2, head.y * CELL + CELL / 2, '#ff4f6d', 10);
+        placeFood();
+        if (!food) return die('You filled the board!');
+      } else {
+        snake.pop();
+      }
+      api.setInfo(`Length ${snake.length}`);
+    }
+
+    api.addDpad(turn);
+
+    return {
+      reset() {
+        snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
+        dir = DIRS.right; queue = []; eaten = 0; dead = false; swipe = null;
+        acc = -0.4;                                                  // a short breather before the first move
+        placeFood(); particles.clear();
+        api.setInfo(`Length ${snake.length}`);
+      },
+
+      update(dt) {
+        t += dt;
+        particles.update(dt);
+        acc += dt;
+        while (acc >= interval() && !dead) { acc -= interval(); step(); }
+      },
+
+      idle(dt) { t += dt; particles.update(dt); },
+
+      keydown(e, k) { if (KEYS[k]) turn(KEYS[k]); },
+
+      // swipe: drag far enough in one direction and the snake turns that way
+      pointerdown(p) { swipe = { x: p.x, y: p.y }; },
+      pointermove(p) {
+        if (!swipe || !api.input.ptr.down) return;
+        const dx = p.x - swipe.x, dy = p.y - swipe.y;
+        if (Math.hypot(dx, dy) < 22) return;
+        turn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+        swipe = { x: p.x, y: p.y };
+      },
+      pointerup() { swipe = null; },
+
+      draw(ctx) {
+        // checkerboard
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+          ctx.fillStyle = (x + y) % 2 ? '#1b1239' : '#170f31';
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        }
+        // apple
+        if (food) {
+          const fx = food.x * CELL + CELL / 2, fy = food.y * CELL + CELL / 2;
+          const r = CELL * 0.36 * (1 + Math.sin(t * 6) * 0.08);
+          ctx.fillStyle = '#ff4f6d'; ctx.beginPath(); ctx.arc(fx, fy + 1, r, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(fx - r * 0.35, fy - r * 0.2, r * 0.25, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#7bf26b'; ctx.fillRect(fx - 1, fy - r - 5, 3, 6);
+        }
+        // snake, tail first so the head sits on top
+        for (let i = snake.length - 1; i >= 0; i--) {
+          const s = snake[i], pad = i === 0 ? 1.5 : 2.5;
+          ctx.fillStyle = i === 0 ? '#b9ff8a' : `hsl(${125 + (i * 3) % 40}, 75%, ${56 - Math.min(i, 24) * 0.7}%)`;
+          rr(ctx, s.x * CELL + pad, s.y * CELL + pad, CELL - pad * 2, CELL - pad * 2, 7); ctx.fill();
+        }
+        // eyes look where the snake is heading
+        const h = snake[0], cx = h.x * CELL + CELL / 2, cy = h.y * CELL + CELL / 2;
+        const px = -dir.y, py = dir.x;                               // sideways vector
+        for (const side of [-1, 1]) {
+          const ex = cx + dir.x * 4 + px * side * 5, ey = cy + dir.y * 4 + py * side * 5;
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(ex, ey, 3.4, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#150d2b'; ctx.beginPath(); ctx.arc(ex + dir.x * 1.2, ey + dir.y * 1.2, 1.7, 0, Math.PI * 2); ctx.fill();
+        }
+        particles.draw(ctx);
+      },
+    };
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Pong
+   Paddles at the top and bottom of a portrait court. First to 7 points wins.
+   1 player: every match you win scores 1 and the next computer opponent is
+   faster and sharper. 2 players: Player 1 (bottom) and Player 2 (top).
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'pong',
+  group: 'balls',
+  name: 'Pong',
+  emoji: '🏓',
+  color: '#8b6cff',
+  players: 'both',
+  p1Color: '#ffd93d',
+  p2Color: '#2ee6d6',
+  blurb: 'The original paddle duel. Play the computer or a friend.',
+  help: 'First to 7 points wins. 1 player: move with the mouse, your finger, or ← → (A D). Each match you win scores 1, and the next opponent is faster. 2 players: Player 1 uses A and D (or drags the bottom half), Player 2 uses ← and → (or drags the top half).',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const PH = 14, R = 8, WIN = 7, MARGIN = 46;
+    const P1 = 0, P2 = 1;                                   // P1 = bottom paddle, P2 = top paddle (or the computer)
+    const paddles = [{ x: W / 2, y: H - MARGIN, w: 96 }, { x: W / 2, y: MARGIN, w: 96 }];
+    const owner = new Map();                                // pointerId -> paddle index (2-player touch)
+    const trail = [];
+    let ball, pts, serveT, serveDir, rally, match, banner, aiNoise;
+
+    const solo = () => api.mode === '1p';
+    const aiSpeed = () => Math.min(540, 195 + 48 * (match - 1));      // the first opponent is slow and sloppy; each match is quicker and sharper
+    const aiError = () => Math.max(0, 64 - 10 * (match - 1));
+    const ballSpeed = () => Math.min(780, 340 + rally * 16 + (solo() ? (match - 1) * 15 : 0));
+    const setX = (i, x) => { paddles[i].x = clamp(x, paddles[i].w / 2, W - paddles[i].w / 2); };
+
+    function updateInfo() { api.setInfo(solo() ? `Match ${match}   You ${pts[0]} to ${pts[1]} computer` : ''); }
+
+    function startServe() {
+      ball = { x: W / 2, y: H / 2, vx: 0, vy: 0 };
+      serveT = 0.9; rally = 0; trail.length = 0;
+      aiNoise = rand(-1, 1) * aiError();
+    }
+
+    function launch() {
+      const a = rand(-0.5, 0.5), s = ballSpeed();
+      ball.vx = Math.sin(a) * s; ball.vy = serveDir * Math.cos(a) * s;
+    }
+
+    function point(i) {
+      pts[i]++;
+      api.setScores(pts[0], pts[1]);
+      api.sound.play(solo() && i === P2 ? 'lose' : 'goal');
+      serveDir = i === P1 ? -1 : 1;                         // serve toward whoever just lost the point
+      if (pts[i] >= WIN) {
+        if (!solo()) { api.endMatch(i === P1 ? 1 : 2, `Final score ${pts[0]} to ${pts[1]}`); return; }
+        if (i === P2) { api.end('The computer wins'); return; }
+        api.addScore(1);                                    // you won the match: bring on a tougher opponent
+        match++; pts = [0, 0];
+        paddles[P1].w = Math.max(64, 96 - 4 * (match - 1));
+        setX(P1, paddles[P1].x);
+        api.setScores(0, 0);
+        banner = { text: `Match ${match}`, t: 1.6 };
+        api.sound.play('levelup');
+      }
+      updateInfo();
+      startServe();
+    }
+
+    function hitPaddle(i) {
+      const p = paddles[i];
+      if (i === P1 ? ball.vy <= 0 : ball.vy >= 0) return;   // only when the ball is moving toward this paddle
+      const front = i === P1 ? p.y - PH / 2 : p.y + PH / 2;
+      const reached = i === P1 ? (ball.y + R >= front && ball.y < p.y) : (ball.y - R <= front && ball.y > p.y);
+      if (!reached || Math.abs(ball.x - p.x) > p.w / 2 + R) return;
+      const off = clamp((ball.x - p.x) / (p.w / 2), -1, 1); // where it landed decides the angle
+      rally++;
+      const s = ballSpeed(), a = off * 1.0;
+      ball.vx = Math.sin(a) * s; ball.vy = (i === P1 ? -1 : 1) * Math.cos(a) * s;
+      ball.y = i === P1 ? front - R : front + R;
+      api.sound.play('paddle');
+      if (i === P1) aiNoise = rand(-1, 1) * aiError();      // the computer picks a fresh aiming error
+    }
+
+    function aiStep(dt) {
+      const p = paddles[P2];
+      const target = (serveT <= 0 && ball.vy < 0) ? ball.x + aiNoise : W / 2;
+      const step = aiSpeed() * dt;
+      setX(P2, p.x + clamp(target - p.x, -step, step));
+    }
+
+    const game = {
+      reset() {
+        pts = [0, 0]; match = 1; banner = null; owner.clear();
+        paddles.forEach(p => { p.w = 96; p.x = W / 2; });
+        serveDir = Math.random() < 0.5 ? 1 : -1;
+        startServe();
+        api.setScores(0, 0);
+        updateInfo();
+      },
+
+      update(dt) {
+        const k = api.input.keys, move = (i, l, r) => { const d = (r ? 1 : 0) - (l ? 1 : 0); if (d) setX(i, paddles[i].x + d * 540 * dt); };
+        if (solo()) { move(P1, k.has('a') || k.has('arrowleft'), k.has('d') || k.has('arrowright')); aiStep(dt); }
+        else { move(P1, k.has('a'), k.has('d')); move(P2, k.has('arrowleft'), k.has('arrowright')); }
+        if (banner) { banner.t -= dt; if (banner.t <= 0) banner = null; }
+
+        if (serveT > 0) { serveT -= dt; if (serveT <= 0) launch(); return; }
+
+        const sp = Math.hypot(ball.vx, ball.vy), steps = Math.max(1, Math.ceil(sp * dt / 5)), h = dt / steps;
+        for (let i = 0; i < steps; i++) {
+          ball.x += ball.vx * h; ball.y += ball.vy * h;
+          if (ball.x < R)         { ball.x = R;     ball.vx =  Math.abs(ball.vx); api.sound.play('wall'); }
+          else if (ball.x > W - R) { ball.x = W - R; ball.vx = -Math.abs(ball.vx); api.sound.play('wall'); }
+          hitPaddle(P1); hitPaddle(P2);
+          if (ball.y > H + R * 2) { point(P2); return; }
+          if (ball.y < -R * 2)    { point(P1); return; }
+        }
+        trail.push({ x: ball.x, y: ball.y }); if (trail.length > 8) trail.shift();
+      },
+
+      pointerdown(p, e) {
+        if (solo()) setX(P1, p.x);
+        else { const i = p.y > H / 2 ? P1 : P2; owner.set(e.pointerId, i); setX(i, p.x); }
+      },
+      pointermove(p, e) {
+        if (solo()) setX(P1, p.x);
+        else if (owner.has(e.pointerId)) setX(owner.get(e.pointerId), p.x);
+      },
+      pointerup(p, e) { owner.delete(e.pointerId); },
+
+      draw(ctx) {
+        ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 3; ctx.setLineDash([14, 12]);
+        ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke(); ctx.setLineDash([]);
+        label(ctx, pts[P2], W - 46, H / 2 - 52, 70, 'rgba(255,255,255,.12)');
+        label(ctx, pts[P1], W - 46, H / 2 + 52, 70, 'rgba(255,255,255,.12)');
+
+        trail.forEach((t, i) => { ctx.globalAlpha = (i + 1) / trail.length * 0.3; ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(t.x, t.y, R * (0.4 + i / 14), 0, Math.PI * 2); ctx.fill(); });
+        ctx.globalAlpha = 1;
+
+        [[paddles[P1], '#ffd93d'], [paddles[P2], '#2ee6d6']].forEach(([p, col]) => {
+          ctx.shadowColor = col; ctx.shadowBlur = 14; ctx.fillStyle = col;
+          rr(ctx, p.x - p.w / 2, p.y - PH / 2, p.w, PH, 7); ctx.fill();
+        });
+        ctx.shadowColor = '#fff'; ctx.shadowBlur = 12; ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, R, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+
+        if (serveT > 0) label(ctx, 'Get ready', W / 2, H / 2 + 90, 26, '#fff', 'center', 0.7);
+        if (banner) label(ctx, banner.text, W / 2, H / 2 - 90, 48, '#ffd93d', 'center', clamp(banner.t, 0, 1));
+        if (api.mode === '2p') {                              // who's who, written the right way up for each player
+          label(ctx, 'Player 2', W / 2, 18, 15, 'rgba(46,230,214,.7)');
+          label(ctx, 'Player 1', W / 2, H - 16, 15, 'rgba(255,217,61,.7)');
+        }
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Bounce Keeper
+   Keep the ball in the air. Every bounce launches it a little higher and pulls
+   it down a little harder, and the paddle slowly shrinks. Hit the middle of the
+   paddle for a "perfect" (2 points).
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'bounce-keeper',
+  group: 'balls',
+  name: 'Bounce Keeper',
+  emoji: '🏀',
+  color: '#ff4fa3',
+  blurb: 'Keep the ball up. It gets faster every bounce.',
+  help: 'Move the paddle with your mouse, your finger, or ← → (A D). Catch the ball in the middle of the paddle for a perfect bounce.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const R = 12, PH = 14, PY = H - 50;
+    const paddle = { x: W / 2, w: 120 };
+    const particles = makeParticles();
+    let ball, hits, delay, texts;
+
+    const gravity = () => Math.min(3200, 1300 + 55 * hits);       // pulls harder as you go…
+    const kick = () => Math.min(1250, 800 + 12 * hits);           // …and each bounce launches it higher
+    const setX = x => { paddle.x = clamp(x, paddle.w / 2, W - paddle.w / 2); };
+
+    function bounce() {
+      const off = clamp((ball.x - paddle.x) / (paddle.w / 2), -1, 1);
+      const perfect = Math.abs(off) < 0.18;
+      ball.vy = -kick();
+      ball.vx = off * Math.min(560, 240 + 8 * hits) + ball.vx * 0.15;
+      ball.y = PY - PH / 2 - R;
+      hits++;
+      api.addScore(perfect ? 2 : 1);
+      api.sound.play(perfect ? 'gold' : 'paddle');
+      particles.burst(ball.x, PY, perfect ? '#ffd93d' : '#ff4fa3', perfect ? 14 : 6, 160);
+      if (perfect) texts.push({ text: 'Perfect!', x: ball.x, y: PY - 40, t: 0.8 });
+      paddle.w = Math.max(70, 120 - hits * 1.0);
+      setX(paddle.x);
+      api.setInfo(`Level ${1 + Math.floor(hits / 10)}`);
+    }
+
+    const game = {
+      reset() {
+        hits = 0; paddle.w = 120; delay = 0.7; texts = [];
+        setX(api.input.ptr.inside ? api.input.ptr.x : W / 2);
+        ball = { x: rand(140, W - 140), y: 110, vx: rand(-80, 80), vy: 0 };
+        particles.clear();
+        api.setInfo('Level 1');
+      },
+
+      update(dt) {
+        const k = api.input.keys;
+        const d = (k.has('arrowright') || k.has('d') ? 1 : 0) - (k.has('arrowleft') || k.has('a') ? 1 : 0);
+        if (d) setX(paddle.x + d * 600 * dt);
+        particles.update(dt);
+        texts.forEach(t => { t.t -= dt; t.y -= 30 * dt; }); texts = texts.filter(t => t.t > 0);
+        if (delay > 0) { delay -= dt; return; }
+
+        const steps = Math.max(1, Math.ceil(Math.abs(ball.vy) * dt / 6)), h = dt / steps;
+        for (let i = 0; i < steps; i++) {
+          ball.vy += gravity() * h;
+          ball.x += ball.vx * h; ball.y += ball.vy * h;
+          if (ball.x < R)          { ball.x = R;     ball.vx =  Math.abs(ball.vx); api.sound.play('wall'); }
+          else if (ball.x > W - R) { ball.x = W - R; ball.vx = -Math.abs(ball.vx); api.sound.play('wall'); }
+          if (ball.y < R)          { ball.y = R;     ball.vy =  Math.abs(ball.vy) * 0.6; }
+          if (ball.vy > 0 && ball.y + R >= PY - PH / 2 && ball.y < PY && Math.abs(ball.x - paddle.x) <= paddle.w / 2 + R * 0.6) bounce();
+          if (ball.y - R > H) { api.sound.play('lose'); api.end('You dropped it!'); return; }
+        }
+      },
+
+      idle(dt) { particles.update(dt); },
+      pointerdown(p) { setX(p.x); },
+      pointermove(p) { setX(p.x); },
+
+      draw(ctx) {
+        // a faint tower of guide lines under the ball, and its shadow on the paddle line
+        ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 2; ctx.setLineDash([6, 10]);
+        ctx.beginPath(); ctx.moveTo(ball.x, ball.y); ctx.lineTo(ball.x, PY); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(ball.x, PY + 12, R * (1.1 - clamp((PY - ball.y) / 700, 0, 0.7)), 4, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.shadowColor = '#ff4fa3'; ctx.shadowBlur = 14; ctx.fillStyle = '#ff9ccb';
+        rr(ctx, paddle.x - paddle.w / 2, PY - PH / 2, paddle.w, PH, 7); ctx.fill();
+        ctx.fillStyle = '#ffd93d'; rr(ctx, paddle.x - 10, PY - PH / 2, 20, PH, 5); ctx.fill();   // the "perfect" zone
+        ctx.shadowBlur = 0;
+
+        const g = ctx.createRadialGradient(ball.x - 4, ball.y - 4, 2, ball.x, ball.y, R);
+        g.addColorStop(0, '#fff'); g.addColorStop(1, '#ff4fa3');
+        ctx.fillStyle = g; ctx.shadowColor = '#ff4fa3'; ctx.shadowBlur = 16;
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, R, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+
+        particles.draw(ctx);
+        texts.forEach(t => label(ctx, t.text, t.x, t.y, 24, '#ffd93d', 'center', clamp(t.t * 2, 0, 1)));
+        if (delay > 0) label(ctx, 'Get ready', W / 2, H / 2, 28, '#fff', 'center', 0.6);
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Plinko
+   Drop 10 balls through the pegs. Tap where you want to drop (or press and
+   slide to aim, then let go). The big prizes are in the corner slots, which are
+   the hardest to reach, and the balls get bigger as you go.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'plinko',
+  group: 'balls',
+  name: 'Plinko',
+  emoji: '🔻',
+  color: '#ffd93d',
+  blurb: 'Drop 10 balls and chase the corner jackpots.',
+  help: 'Tap or click along the top to drop a ball. On a phone you can press and slide to aim, then let go. You get 10 balls, and the balls grow as you play.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const SLOT_W = 60, SLOTS = 8, SLOT_TOP = H - 90, TOTAL = 10;
+    const VALUES = [100, 30, 10, 5, 5, 10, 30, 100];
+    const SLOT_COLORS = ['#ffd93d', '#ff8a3d', '#ff4fa3', '#8b6cff', '#8b6cff', '#ff4fa3', '#ff8a3d', '#ffd93d'];
+    const PEG_R = 6, GRAVITY = 1100, E = 0.5;
+    const pegs = [];
+    for (let row = 0; row < 9; row++) {
+      const y = 140 + row * 44, odd = row % 2 === 1;
+      const count = odd ? SLOTS - 1 : SLOTS;
+      for (let i = 0; i < count; i++) pegs.push({ x: (odd ? SLOT_W : SLOT_W / 2) + i * SLOT_W, y });
+    }
+    const particles = makeParticles();
+    let balls, left, aim, aiming, lastDrop, popups, finishT;
+
+    const radius = n => 8 + 0.4 * n;                              // balls grow from 8 to ~11.6
+
+    function drop(x) {
+      if (left <= 0 || performance.now() - lastDrop < 300) return;
+      const r = radius(TOTAL - left);
+      balls.push({ x: clamp(x, r, W - r), y: 46, vx: rand(-10, 10), vy: 0, r, slow: 0, done: false, fade: 1 });
+      left--; lastDrop = performance.now();
+      api.sound.play('drop');
+      api.setInfo(`Balls left ${left}`);
+    }
+
+    function stepBall(b, h) {
+      b.vy += GRAVITY * h;
+      b.x += b.vx * h; b.y += b.vy * h;
+      if (b.x < b.r)          { b.x = b.r;     b.vx =  Math.abs(b.vx) * E; }
+      else if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * E; }
+      for (const p of pegs) {
+        const dx = b.x - p.x, dy = b.y - p.y, rs = b.r + PEG_R;
+        if (dx * dx + dy * dy >= rs * rs) continue;
+        const d = Math.sqrt(dx * dx + dy * dy) || 0.001, nx = dx / d, ny = dy / d;
+        b.x = p.x + nx * rs; b.y = p.y + ny * rs;                 // push out of the peg
+        const vn = b.vx * nx + b.vy * ny;
+        if (vn < 0) {
+          b.vx -= (1 + E) * vn * nx; b.vy -= (1 + E) * vn * ny;   // bounce
+          b.vx += rand(-18, 18);                                  // a touch of chaos so no ball balances on a peg
+          if (-vn > 120) api.sound.play('peg');
+        }
+      }
+      if (b.y + b.r > SLOT_TOP) {                                 // inside the slot area: the dividers are walls
+        const slot = clamp(Math.floor(b.x / SLOT_W), 0, SLOTS - 1);
+        const lo = slot * SLOT_W + b.r, hi = (slot + 1) * SLOT_W - b.r;
+        if (b.x < lo) { b.x = lo; b.vx = Math.abs(b.vx) * E; }
+        if (b.x > hi) { b.x = hi; b.vx = -Math.abs(b.vx) * E; }
+      }
+    }
+
+    function land(b) {
+      b.done = true;
+      const slot = clamp(Math.floor(b.x / SLOT_W), 0, SLOTS - 1), v = VALUES[slot];
+      api.addScore(v);
+      api.sound.play(v >= 100 ? 'win' : v >= 30 ? 'gold' : 'pop');
+      particles.burst(b.x, H - 30, SLOT_COLORS[slot], v >= 30 ? 22 : 8, 200);
+      popups.push({ text: `+${v}`, x: slot * SLOT_W + SLOT_W / 2, y: SLOT_TOP - 10, t: 1, color: SLOT_COLORS[slot] });
+    }
+
+    const game = {
+      reset() {
+        balls = []; left = TOTAL; aiming = false; aim = W / 2; lastDrop = 0; popups = []; finishT = 0;
+        particles.clear();
+        api.setInfo(`Balls left ${left}`);
+      },
+
+      update(dt) {
+        particles.update(dt);
+        popups.forEach(p => { p.t -= dt; p.y -= 40 * dt; }); popups = popups.filter(p => p.t > 0);
+        const steps = 4, h = dt / steps;
+        for (const b of balls) {
+          if (b.done) { b.fade = Math.max(0, b.fade - dt * 2); continue; }
+          for (let i = 0; i < steps; i++) stepBall(b, h);
+          b.slow = Math.hypot(b.vx, b.vy) < 25 ? b.slow + dt : 0;
+          if (b.slow > 1.2) { b.vx += rand(-160, 160); b.vy -= 120; b.slow = 0; }   // un-stick a ball that's balancing
+          if (b.y > H - 30) land(b);
+        }
+        balls = balls.filter(b => b.fade > 0);
+        if (left === 0 && balls.every(b => b.done)) { finishT += dt; if (finishT > 0.8) api.end('All balls dropped'); }
+        else finishT = 0;
+      },
+
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p) { aiming = true; aim = p.x; },
+      pointermove(p) { if (aiming || api.input.ptr.inside) aim = p.x; },
+      pointerup(p) { if (aiming) { aiming = false; drop(p.x); } },
+
+      draw(ctx) {
+        // slots
+        for (let i = 0; i < SLOTS; i++) {
+          ctx.fillStyle = SLOT_COLORS[i]; ctx.globalAlpha = 0.22;
+          ctx.fillRect(i * SLOT_W, SLOT_TOP, SLOT_W, H - SLOT_TOP); ctx.globalAlpha = 1;
+          label(ctx, VALUES[i], i * SLOT_W + SLOT_W / 2, H - 22, VALUES[i] >= 100 ? 22 : 20, SLOT_COLORS[i]);
+        }
+        ctx.fillStyle = 'rgba(255,255,255,.55)';
+        for (let i = 1; i < SLOTS; i++) ctx.fillRect(i * SLOT_W - 2, SLOT_TOP, 4, H - SLOT_TOP);
+        // pegs
+        ctx.fillStyle = '#c9bdf2';
+        for (const p of pegs) { ctx.beginPath(); ctx.arc(p.x, p.y, PEG_R, 0, Math.PI * 2); ctx.fill(); }
+        // aim guide
+        if (left > 0 && (aiming || api.input.ptr.inside)) {
+          const r = radius(TOTAL - left), ax = clamp(aim, r, W - r);
+          ctx.globalAlpha = 0.4; ctx.fillStyle = '#ffd93d';
+          ctx.beginPath(); ctx.arc(ax, 46, r, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#ffd93d'; ctx.lineWidth = 2; ctx.setLineDash([4, 8]);
+          ctx.beginPath(); ctx.moveTo(ax, 60); ctx.lineTo(ax, 120); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+        } else if (left > 0 && balls.length === 0) label(ctx, 'Tap to drop', W / 2, 46, 24, '#fff', 'center', 0.6);
+        // balls
+        for (const b of balls) {
+          ctx.globalAlpha = b.fade; ctx.fillStyle = '#ffd93d'; ctx.shadowColor = '#ffd93d'; ctx.shadowBlur = 10;
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+          ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.beginPath(); ctx.arc(b.x - b.r * .3, b.y - b.r * .3, b.r * .3, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+        particles.draw(ctx);
+        popups.forEach(p => label(ctx, p.text, p.x, p.y, 26, p.color, 'center', clamp(p.t * 1.5, 0, 1)));
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Whack-a-Mole
+   30 seconds. Moles pop up faster and stay up for less time as the clock runs
+   down. Golden moles are worth 30. Chain hits for a streak bonus; a miss or an
+   escaped mole breaks it.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'whack-a-mole',
+  group: 'quick',
+  name: 'Whack-a-Mole',
+  emoji: '🔨',
+  color: '#e0a458',
+  blurb: 'Thirty seconds. Whack everything that pops up.',
+  help: 'Tap or click the moles. On a keyboard, the nine keys Q W E / A S D / Z X C match the nine holes. Golden moles are worth 30.',
+  size: [480, 560],
+
+  create(api) {
+    const { W } = api;
+    const TIME = 30;
+    const COLS = [100, 240, 380], ROWS = [210, 350, 490];
+    const KEYS = ['q', 'w', 'e', 'a', 's', 'd', 'z', 'x', 'c'];
+    const holes = [];
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) holes.push({ x: COLS[i], y: ROWS[j], up: false, t: 0, dur: 1, golden: false, hit: false, hitT: 0 });
+    const particles = makeParticles();
+    let elapsed, spawnT, streak, texts, swing;
+
+    const popTime = () => Math.max(0.5, 1.25 - elapsed * 0.025);
+    const spawnGap = () => Math.max(0.32, 0.95 - elapsed * 0.02);
+    const maxUp = () => Math.min(3, 1 + Math.floor(elapsed / 10));
+
+    function spawn() {
+      const free = holes.filter(h => !h.up && h.hitT <= 0);
+      if (!free.length || holes.filter(h => h.up && !h.hit).length >= maxUp()) return;
+      const h = pick(free), golden = Math.random() < 0.12;
+      Object.assign(h, { up: true, t: 0, golden, hit: false, hitT: 0, dur: golden ? popTime() * 0.75 : popTime() });
+    }
+
+    function whack(i) {
+      const h = holes[i];
+      if (h.up && !h.hit) {
+        h.hit = true; h.hitT = 0.35;
+        const pts = (h.golden ? 30 : 10) + Math.min(streak, 10);
+        streak++;
+        api.addScore(pts);
+        api.sound.play(h.golden ? 'gold' : 'whack');
+        particles.burst(h.x, h.y - 30, h.golden ? '#ffd93d' : '#e0a458', 14, 220);
+        texts.push({ text: `+${pts}`, x: h.x, y: h.y - 70, t: 0.7 });
+      } else { streak = 0; api.sound.play('buzz'); }
+      swing = { x: holes[i].x, y: holes[i].y, t: 0.18 };
+    }
+
+    function holeAt(p) {
+      let bestI = -1, bestD = 70 * 70;
+      holes.forEach((h, i) => { const d = (p.x - h.x) ** 2 + (p.y - (h.y - 25)) ** 2; if (d < bestD) { bestD = d; bestI = i; } });
+      return bestI;
+    }
+
+    const game = {
+      reset() {
+        elapsed = 0; spawnT = 0.6; streak = 0; texts = []; swing = null;
+        holes.forEach(h => Object.assign(h, { up: false, t: 0, hit: false, hitT: 0, golden: false }));
+        particles.clear();
+        api.setInfo(`Time ${TIME}`);
+      },
+
+      update(dt) {
+        elapsed += dt;
+        particles.update(dt);
+        texts.forEach(t => { t.t -= dt; t.y -= 40 * dt; }); texts = texts.filter(t => t.t > 0);
+        if (swing) { swing.t -= dt; if (swing.t <= 0) swing = null; }
+        spawnT -= dt;
+        if (spawnT <= 0) { spawn(); spawnT = spawnGap() * rand(0.7, 1.3); }
+        for (const h of holes) {
+          if (h.hitT > 0) { h.hitT -= dt; if (h.hitT <= 0) h.up = false; continue; }
+          if (!h.up) continue;
+          h.t += dt;
+          if (h.t >= h.dur) { h.up = false; streak = 0; }             // it got away
+        }
+        api.setInfo(`Time ${Math.max(0, Math.ceil(TIME - elapsed))}`);
+        if (elapsed >= TIME) { api.sound.play('go'); api.end('Time’s up!'); }
+      },
+
+      idle(dt) { particles.update(dt); },
+      keydown(e, k) { const i = KEYS.indexOf(k); if (i >= 0) whack(i); },
+      pointerdown(p) { const i = holeAt(p); if (i >= 0) whack(i); else { streak = 0; } },
+
+      draw(ctx) {
+        // timer bar
+        const f = clamp(1 - elapsed / TIME, 0, 1);
+        ctx.fillStyle = 'rgba(255,255,255,.1)'; rr(ctx, 30, 40, W - 60, 16, 8); ctx.fill();
+        ctx.fillStyle = f > 0.25 ? '#e0a458' : '#ff4f6d'; rr(ctx, 30, 40, Math.max(16, (W - 60) * f), 16, 8); ctx.fill();
+        if (streak >= 2) label(ctx, `Streak ${streak}`, W / 2, 90, 26, '#ffd93d');
+
+        for (const h of holes) {
+          // the dark inside of the hole, then the mole (clipped at the hole's centre line), then the hole's front lip on top
+          ctx.fillStyle = '#1a0e07'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 6, 56, 20, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.save();
+          ctx.beginPath(); ctx.rect(h.x - 70, h.y - 130, 140, 136); ctx.clip();       // only show the part above the hole
+          if (h.up || h.hitT > 0) {
+            const rise = h.hit ? 1 - (0.35 - h.hitT) / 0.35 * 0.4 : clamp(Math.min(h.t / 0.12, (h.dur - h.t) / 0.12), 0, 1);
+            const my = h.y + 62 - rise * 78 + (h.hit ? 14 : 0);
+            ctx.fillStyle = h.golden ? '#ffd93d' : '#a8703a';
+            ctx.beginPath(); ctx.ellipse(h.x, my, 42, 48, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = h.golden ? '#fff1a6' : '#d9a066';
+            ctx.beginPath(); ctx.ellipse(h.x, my + 14, 24, 17, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#2b1a10'; ctx.beginPath(); ctx.ellipse(h.x, my + 6, 7, 5, 0, 0, Math.PI * 2); ctx.fill();   // nose
+            ctx.fillStyle = '#fff';
+            if (h.hit) { label(ctx, '×', h.x - 15, my - 10, 22, '#2b1a10'); label(ctx, '×', h.x + 15, my - 10, 22, '#2b1a10'); }
+            else {
+              ctx.beginPath(); ctx.arc(h.x - 15, my - 10, 8, 0, Math.PI * 2); ctx.arc(h.x + 15, my - 10, 8, 0, Math.PI * 2); ctx.fill();
+              ctx.fillStyle = '#2b1a10'; ctx.beginPath(); ctx.arc(h.x - 14, my - 9, 4, 0, Math.PI * 2); ctx.arc(h.x + 16, my - 9, 4, 0, Math.PI * 2); ctx.fill();
+            }
+          }
+          ctx.restore();
+          // the hole's front lip
+          ctx.fillStyle = '#4a2d19'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 6, 56, 20, 0, 0, Math.PI); ctx.fill();
+          ctx.strokeStyle = '#8a5a30'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(h.x, h.y + 6, 56, 20, 0, 0, Math.PI * 2); ctx.stroke();
+        }
+        // keyboard hints on each hole
+        holes.forEach((h, i) => label(ctx, KEYS[i].toUpperCase(), h.x, h.y + 40, 14, 'rgba(255,255,255,.35)'));
+        particles.draw(ctx);
+        texts.forEach(t => label(ctx, t.text, t.x, t.y, 26, '#ffd93d', 'center', clamp(t.t * 2, 0, 1)));
+        if (swing) { ctx.save(); ctx.translate(swing.x + 30, swing.y - 90); ctx.rotate(0.5 - swing.t * 4); label(ctx, '🔨', 0, 0, 50, '#fff', 'center', clamp(swing.t * 6, 0, 1)); ctx.restore(); }
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Memory Match
+   Cards are shown face up for a moment, then flip down. Find all the pairs
+   before the clock runs out. Each level has more cards and a shorter preview.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'memory-match',
+  group: 'quick',
+  name: 'Memory Match',
+  emoji: '🧠',
+  color: '#4aa8ff',
+  blurb: 'Find every pair before time runs out.',
+  help: 'Tap two cards to flip them. Matching back-to-back builds a streak bonus. Clear a board to move up a level: more cards, less peeking. On a keyboard, use the arrow keys and Space.',
+  size: [480, 560],
+
+  create(api) {
+    const { W, H } = api;
+    const LEVELS = [[4, 3], [4, 4], [5, 4], [6, 4], [6, 5], [6, 6]];          // [columns, rows]
+    const EMOJI = ['🍎', '🍌', '🍇', '🍓', '🍉', '🍒', '🥝', '🍍', '🥑', '🌽', '🍕', '🍔', '🍩', '🍪', '🎈', '⚽', '🚀', '🐙', '🦊', '🐸', '🐼', '🌈', '⭐', '🔥'];
+    const particles = makeParticles();
+    let cards, cols, level, timeLeft, timeMax, open, resolve, streak, peekT, banner, cursor, usedKey;
+
+    const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+    function build() {
+      const [c, rows] = LEVELS[Math.min(level - 1, LEVELS.length - 1)];
+      cols = c;
+      const pairs = c * rows / 2;
+      const faces = shuffle(EMOJI).slice(0, pairs);
+      const values = shuffle([...faces, ...faces]);
+      const gap = 10, areaW = W - 40, areaH = H - 120;
+      const s = Math.min((areaW - gap * (c - 1)) / c, (areaH - gap * (rows - 1)) / rows);
+      const x0 = (W - (c * s + (c - 1) * gap)) / 2, y0 = 90 + (areaH - (rows * s + (rows - 1) * gap)) / 2;
+      cards = values.map((v, i) => ({ v, s, x: x0 + (i % c) * (s + gap), y: y0 + Math.floor(i / c) * (s + gap), flip: 1, face: true, matched: false, glow: 0 }));
+      peekT = Math.max(0.7, 2.4 - 0.35 * (level - 1));                         // a short look at the board first
+      timeMax = timeLeft = 25 + pairs * Math.max(2.8, 5 - 0.3 * (level - 1));
+      open = []; resolve = null; cursor = 0;
+    }
+
+    function updateInfo() { api.setInfo(`Level ${level}   Time ${Math.max(0, Math.ceil(timeLeft))}`); }
+
+    function flipCard(i) {
+      if (peekT > 0 || resolve || banner) return;
+      const c = cards[i];
+      if (!c || c.face || c.matched) return;
+      c.face = true; open.push(i);
+      api.sound.play('flip');
+      if (open.length === 2) resolve = { ok: cards[open[0]].v === cards[open[1]].v, t: cards[open[0]].v === cards[open[1]].v ? 0.45 : 0.75 };
+    }
+
+    function finishResolve() {
+      const [a, b] = open;
+      if (resolve.ok) {
+        cards[a].matched = cards[b].matched = true; cards[a].glow = cards[b].glow = 1;
+        const pts = 100 + Math.min(streak, 5) * 20;
+        streak++;
+        api.addScore(pts);
+        api.sound.play('match');
+        for (const i of [a, b]) particles.burst(cards[i].x + cards[i].s / 2, cards[i].y + cards[i].s / 2, '#4aa8ff', 10, 180);
+        if (cards.every(c => c.matched)) {
+          const bonus = Math.ceil(timeLeft) * 5 + level * 50;
+          api.addScore(bonus);
+          api.sound.play('levelup');
+          banner = { text: `Level ${level} clear!  +${bonus}`, t: 1.5 };
+        }
+      } else {
+        cards[a].face = cards[b].face = false; streak = 0;
+        api.sound.play('buzz');
+      }
+      open = []; resolve = null;
+    }
+
+    const game = {
+      reset() { level = 1; streak = 0; banner = null; usedKey = false; particles.clear(); build(); updateInfo(); },
+
+      update(dt) {
+        for (const c of cards) {
+          const target = c.face || c.matched ? 1 : 0;
+          c.flip += clamp(target - c.flip, -dt * 7, dt * 7);
+          if (c.glow > 0) c.glow = Math.max(0, c.glow - dt * 1.5);
+        }
+        particles.update(dt);
+        if (banner) { banner.t -= dt; if (banner.t <= 0) { banner = null; level++; build(); updateInfo(); } return; }
+        if (peekT > 0) { peekT -= dt; if (peekT <= 0) cards.forEach(c => { c.face = false; }); return; }
+        if (resolve) { resolve.t -= dt; if (resolve.t <= 0) finishResolve(); }
+        timeLeft -= dt; updateInfo();
+        if (timeLeft <= 0) { api.sound.play('lose'); api.end('Time’s up!'); }
+      },
+
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p) {
+        const i = cards.findIndex(c => p.x >= c.x && p.x <= c.x + c.s && p.y >= c.y && p.y <= c.y + c.s);
+        if (i >= 0) { usedKey = false; flipCard(i); }
+      },
+      keydown(e, k) {
+        const n = cards.length;
+        if (k === 'arrowright') cursor = (cursor + 1) % n;
+        else if (k === 'arrowleft') cursor = (cursor + n - 1) % n;
+        else if (k === 'arrowdown') cursor = (cursor + cols) % n;
+        else if (k === 'arrowup') cursor = (cursor + n - cols) % n;
+        else if (k === ' ' || k === 'enter') flipCard(cursor);
+        else return;
+        usedKey = true;
+      },
+
+      draw(ctx) {
+        // timer bar
+        const f = clamp(timeLeft / timeMax, 0, 1);
+        ctx.fillStyle = 'rgba(255,255,255,.1)'; rr(ctx, 30, 36, W - 60, 14, 7); ctx.fill();
+        ctx.fillStyle = f > 0.25 ? '#4aa8ff' : '#ff4f6d'; rr(ctx, 30, 36, Math.max(14, (W - 60) * f), 14, 7); ctx.fill();
+        if (peekT > 0) label(ctx, 'Memorize!', W / 2, 72, 26, '#ffd93d');
+        else if (streak >= 2) label(ctx, `Streak ${streak}`, W / 2, 72, 24, '#ffd93d');
+
+        cards.forEach((c, i) => {
+          const sx = Math.abs(Math.cos(c.flip * Math.PI)), cx = c.x + c.s / 2, cy = c.y + c.s / 2;
+          ctx.save();
+          ctx.translate(cx, cy); ctx.scale(Math.max(0.02, sx), 1);
+          if (c.flip > 0.5) {                                          // face
+            ctx.fillStyle = c.matched ? '#d8f0ff' : '#f6f1ff';
+            rr(ctx, -c.s / 2, -c.s / 2, c.s, c.s, c.s * 0.16); ctx.fill();
+            if (c.glow > 0) { ctx.strokeStyle = `rgba(74,168,255,${c.glow})`; ctx.lineWidth = 5; ctx.stroke(); }
+            ctx.font = `${Math.floor(c.s * 0.55)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#150d2b';
+            ctx.fillText(c.v, 0, 3);
+          } else {                                                     // back
+            ctx.fillStyle = '#3a4fc9'; rr(ctx, -c.s / 2, -c.s / 2, c.s, c.s, c.s * 0.16); ctx.fill();
+            ctx.fillStyle = '#5b78ff'; rr(ctx, -c.s / 2 + 6, -c.s / 2 + 6, c.s - 12, c.s - 12, c.s * 0.12); ctx.fill();
+            label(ctx, '?', 0, 2, c.s * 0.5, 'rgba(255,255,255,.55)');
+          }
+          ctx.restore();
+          if (usedKey && i === cursor) { ctx.strokeStyle = '#ffd93d'; ctx.lineWidth = 4; rr(ctx, c.x - 4, c.y - 4, c.s + 8, c.s + 8, c.s * 0.2); ctx.stroke(); }
+        });
+        particles.draw(ctx);
+        if (banner) {
+          ctx.fillStyle = 'rgba(14,8,32,.7)'; ctx.fillRect(0, H / 2 - 50, W, 100);
+          label(ctx, banner.text, W / 2, H / 2, 36, '#ffd93d');
+        }
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Reaction Time Test
+   Five rounds. Wait for the screen to turn green, then tap as fast as you can.
+   Tap too early and it's a false start (three and you're out). From round 4 the
+   screen will sometimes try to trick you with a yellow fake-out. Your score is
+   the average in milliseconds, so a LOWER number is better.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'reaction-time',
+  group: 'quick',
+  name: 'Reaction Time',
+  emoji: '⚡',
+  color: '#2fd16b',
+  scoring: { lower: true, unit: ' ms' },
+  blurb: 'Tap the instant it turns green. Lower is better.',
+  help: 'Wait for green, then tap, click, or press Space. Don’t go early! Five rounds, and your score is your average in milliseconds. After round 3, watch out for the yellow fake-out.',
+  size: [480, 560],
+
+  create(api) {
+    const { W, H } = api;
+    const ROUNDS = 5;
+    const COLORS = { wait: '#d9304f', fake: '#e8b923', go: '#2fd16b', result: '#3b4bd6', soon: '#7a2a8f' };
+    let st, round, times, waited, waitT, fakeAt, fakeDone, fakeT, goAt, msg, resultT, falseStarts;
+
+    const avg = () => times.length ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : 0;
+    const rating = a => a < 220 ? 'Lightning fast!' : a < 280 ? 'Quick!' : a < 380 ? 'Not bad' : 'Wake up!';
+
+    function startRound() {
+      st = 'wait'; waited = 0; fakeDone = false;
+      const fake = round >= 3 && Math.random() < 0.7;
+      waitT = rand(1.4, 3.4) + (fake ? 1.3 : 0);
+      fakeAt = fake ? rand(0.6, 1.2) : -1;
+      api.setInfo(`Round ${round + 1} of ${ROUNDS}`);
+    }
+
+    function tap() {
+      if (st === 'wait' || st === 'fake') {                                  // too early!
+        falseStarts++;
+        api.sound.play('buzz');
+        st = 'soon'; resultT = 1.3;
+        msg = falseStarts >= 3 ? 'Too jumpy!' : `Too soon! (${falseStarts} of 3)`;
+      } else if (st === 'go') {
+        const ms = Math.round(performance.now() - goAt);
+        times.push(ms); round++;
+        api.setScore(avg());
+        api.sound.play(ms < 250 ? 'gold' : 'pop');
+        st = 'result'; resultT = 1.25; msg = `${ms} ms`;
+      }
+    }
+
+    const game = {
+      reset() { round = 0; times = []; falseStarts = 0; msg = ''; startRound(); st = 'wait'; waited = -0.6; },   // a short beat before round 1
+
+      update(dt) {
+        if (st === 'wait') {
+          waited += dt;
+          if (fakeAt >= 0 && !fakeDone && waited >= fakeAt) { st = 'fake'; fakeT = 0.55; }
+          else if (waited >= waitT) { st = 'go'; goAt = performance.now(); api.sound.play('go'); }
+        } else if (st === 'fake') {
+          waited += dt; fakeT -= dt;
+          if (fakeT <= 0) { st = 'wait'; fakeDone = true; }
+        } else if (st === 'result' || st === 'soon') {
+          resultT -= dt;
+          if (resultT <= 0) {
+            if (falseStarts >= 3) { api.end('Too jumpy!'); return; }
+            if (round >= ROUNDS) { api.end(rating(avg())); return; }
+            startRound();
+          }
+        }
+      },
+
+      pointerdown() { tap(); },
+      keydown(e, k) { if (k === ' ' || k === 'enter') tap(); },
+
+      draw(ctx) {
+        ctx.fillStyle = COLORS[st]; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(0, 0, W, H);
+        const big = { wait: 'Wait for green…', fake: 'Almost…', go: 'TAP!', result: msg, soon: msg }[st];
+        label(ctx, big, W / 2, H / 2 - 20, st === 'go' ? 110 : st === 'result' ? 84 : 44, '#fff');
+        const sub = { wait: waited < 0 ? 'Get ready' : 'Don’t tap yet', fake: 'Not yet…', go: '', result: rating(times[times.length - 1] || 999), soon: round >= 0 ? 'The round starts again' : '' }[st];
+        if (sub) label(ctx, sub, W / 2, H / 2 + 50, 24, 'rgba(255,255,255,.8)');
+        // round pips + the times so far
+        for (let i = 0; i < ROUNDS; i++) {
+          ctx.beginPath(); ctx.arc(W / 2 + (i - 2) * 34, 56, 11, 0, Math.PI * 2);
+          ctx.fillStyle = i < times.length ? '#fff' : 'rgba(255,255,255,.25)'; ctx.fill();
+        }
+        times.forEach((t, i) => label(ctx, `${i + 1}.  ${t} ms`, W / 2, H - 150 + i * 26, 20, 'rgba(255,255,255,.85)'));
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Flappy
+   Tap to flap, slip through the gaps. The pipes speed up and the gaps shrink
+   as your score climbs.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'flappy',
+  group: 'quick',
+  name: 'Flappy',
+  emoji: '🐤',
+  color: '#7bdff2',
+  blurb: 'Tap to flap through the gaps.',
+  help: 'Tap, click, or press Space (or ↑) to flap. Don’t touch the pipes or the ground.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const R = 14, BX = 120, PW = 72, GROUND = H - 56, GRAVITY = 1500, FLAP = -470, SPACING = 235;
+    const bird = { y: H / 2, vy: 0 };
+    const particles = makeParticles();
+    let pipes, started, scroll, bob;
+
+    const speed = () => Math.min(270, 150 + 3.5 * api.score);
+    const gapSize = () => Math.max(135, 205 - 3 * api.score);
+
+    function addPipe(x) {
+      const gap = gapSize(), last = pipes[pipes.length - 1];
+      let lo = 90 + gap / 2, hi = GROUND - 90 - gap / 2;
+      if (last) { lo = Math.max(lo, last.gapY - 170); hi = Math.min(hi, last.gapY + 170); }   // never an impossible jump
+      pipes.push({ x, gapY: rand(lo, hi), gap, passed: false });
+    }
+
+    function flap() {
+      started = true;
+      bird.vy = FLAP;
+      api.sound.play('flap');
+      particles.burst(BX - 8, bird.y + 6, '#ffffff', 3, 60);
+    }
+
+    function crash() { api.sound.play('lose'); particles.burst(BX, bird.y, '#ffd93d', 18, 240); api.end('Crashed!'); }
+
+    function hitsRect(rx, ry, rw, rh) {
+      const cx = clamp(BX, rx, rx + rw), cy = clamp(bird.y, ry, ry + rh);
+      return (BX - cx) ** 2 + (bird.y - cy) ** 2 < (R - 1) ** 2;
+    }
+
+    const game = {
+      reset() {
+        pipes = []; started = false; scroll = 0; bob = 0; bird.y = H / 2; bird.vy = 0; particles.clear();
+        addPipe(W + 120); addPipe(W + 120 + SPACING);
+      },
+
+      update(dt) {
+        scroll += (started ? speed() : 60) * dt;
+        particles.update(dt);
+        if (!started) { bob += dt; bird.y = H / 2 + Math.sin(bob * 4) * 8; return; }
+        bird.vy = Math.min(800, bird.vy + GRAVITY * dt);
+        bird.y += bird.vy * dt;
+        if (bird.y < R) { bird.y = R; bird.vy = 0; }
+        for (const p of pipes) {
+          p.x -= speed() * dt;
+          if (!p.passed && p.x + PW < BX - R) { p.passed = true; api.addScore(1); api.sound.play('pop'); }
+        }
+        if (pipes[0].x + PW < -10) pipes.shift();
+        if (pipes[pipes.length - 1].x < W - SPACING + 60) addPipe(pipes[pipes.length - 1].x + SPACING);
+        if (bird.y + R > GROUND) return crash();
+        for (const p of pipes) {
+          if (hitsRect(p.x, 0, PW, p.gapY - p.gap / 2) || hitsRect(p.x, p.gapY + p.gap / 2, PW, H)) return crash();
+        }
+      },
+
+      idle(dt) { particles.update(dt); },
+      pointerdown() { flap(); },
+      keydown(e, k) { if (k === ' ' || k === 'arrowup' || k === 'w') flap(); },
+
+      draw(ctx) {
+        // distant stars drifting past
+        for (let i = 0; i < 16; i++) {
+          const x = ((i * 97 - scroll * 0.15) % (W + 20) + W + 20) % (W + 20) - 10, y = (i * 61) % (GROUND - 40) + 10;
+          ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(x, y, 3, 3);
+        }
+        // pipes
+        for (const p of pipes) {
+          for (const [y, h, capY] of [[0, p.gapY - p.gap / 2, p.gapY - p.gap / 2 - 24], [p.gapY + p.gap / 2, GROUND, p.gapY + p.gap / 2]]) {
+            ctx.fillStyle = '#34c46a'; ctx.fillRect(p.x, y, PW, h - (y === 0 ? 0 : y));
+            ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(p.x + 8, y, 10, h - (y === 0 ? 0 : y));
+            ctx.fillStyle = '#26a057'; rr(ctx, p.x - 6, capY, PW + 12, 24, 6); ctx.fill();
+          }
+        }
+        // ground
+        ctx.fillStyle = '#3a2a66'; ctx.fillRect(0, GROUND, W, H - GROUND);
+        ctx.fillStyle = '#5b44a6'; for (let x = -((scroll % 40)); x < W; x += 40) ctx.fillRect(x, GROUND, 20, 8);
+        // bird (tilts with its speed)
+        ctx.save(); ctx.translate(BX, bird.y); ctx.rotate(clamp(bird.vy / 900, -0.5, 0.9));
+        ctx.fillStyle = '#ffd93d'; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffb02e'; ctx.beginPath(); ctx.ellipse(-4, 4, 8, 5, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ff8a3d'; ctx.beginPath(); ctx.moveTo(R - 2, -2); ctx.lineTo(R + 9, 2); ctx.lineTo(R - 2, 6); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(5, -5, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#150d2b'; ctx.beginPath(); ctx.arc(7, -5, 2.4, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        particles.draw(ctx);
+        label(ctx, api.score, W / 2, 70, 64, 'rgba(255,255,255,.85)');
+        if (!started) label(ctx, 'Tap to flap', W / 2, H / 2 + 80, 30, '#fff', 'center', 0.5 + 0.5 * Math.sin(performance.now() / 300));
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Dodge
+   Slide left and right to stay alive. Things fall faster and more often the
+   longer you last. Squeaking past a rock earns a bonus. Score = time survived
+   (10 points a second) plus bonuses.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'dodge',
+  group: 'quick',
+  name: 'Dodge',
+  emoji: '☄️',
+  color: '#ff4f6d',
+  blurb: 'Stay alive while the sky falls.',
+  help: 'Move with the mouse, your finger (drag anywhere), or ← → (A D). Near misses earn a bonus.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const PY = H - 70, PR = 15;
+    const player = { x: W / 2 };
+    const particles = makeParticles();
+    let objs, elapsed, spawnT, bonus, texts, trail;
+
+    const fallSpeed = () => Math.min(560, 190 + elapsed * 7);
+    const interval = () => Math.max(0.17, 0.75 - elapsed * 0.012);
+    const setX = x => { player.x = clamp(x, PR, W - PR); };
+
+    function spawn() {
+      const r = rand(10, 24);
+      const drift = elapsed > 10 ? rand(-1, 1) * Math.min(150, (elapsed - 10) * 4) : 0;     // diagonal rocks arrive later
+      objs.push({ x: rand(r, W - r), y: -r, r, vy: fallSpeed() * rand(0.85, 1.2), vx: drift, spin: rand(0, 6), close: false });
+    }
+
+    const game = {
+      reset() {
+        objs = []; elapsed = 0; spawnT = 0.5; bonus = 0; texts = []; trail = [];
+        setX(api.input.ptr.inside ? api.input.ptr.x : W / 2); particles.clear();
+        api.setInfo('');
+      },
+
+      update(dt) {
+        elapsed += dt;
+        const k = api.input.keys, d = (k.has('arrowright') || k.has('d') ? 1 : 0) - (k.has('arrowleft') || k.has('a') ? 1 : 0);
+        if (d) setX(player.x + d * 580 * dt);
+        particles.update(dt);
+        texts.forEach(t => { t.t -= dt; t.y -= 40 * dt; }); texts = texts.filter(t => t.t > 0);
+        trail.push({ x: player.x, t: 0.25 }); trail.forEach(t => t.t -= dt); trail = trail.filter(t => t.t > 0);
+
+        spawnT -= dt;
+        if (spawnT <= 0) { spawn(); spawnT = interval() * rand(0.6, 1.3); }
+        for (const o of objs) {
+          o.x += o.vx * dt; o.y += o.vy * dt; o.spin += dt * 3;
+          const dist = Math.hypot(o.x - player.x, o.y - PY);
+          if (dist < PR + o.r * 0.88) {
+            api.sound.play('lose'); particles.burst(player.x, PY, '#ff4f6d', 26, 300);
+            api.end('Squashed!'); return;
+          }
+          if (!o.close && o.y > PY && dist < PR + o.r + 10) {                      // it just missed you
+            o.close = true; bonus += 5; api.sound.play('tick');
+            texts.push({ text: 'Close! +5', x: player.x, y: PY - 36, t: 0.7 });
+          }
+        }
+        objs = objs.filter(o => o.y < H + 40 && o.x > -60 && o.x < W + 60);
+        api.setScore(Math.floor(elapsed * 10) + bonus);
+        api.setInfo(`Time ${elapsed.toFixed(1)}s`);
+      },
+
+      idle(dt) { particles.update(dt); },
+      pointerdown(p) { setX(p.x); },
+      pointermove(p) { setX(p.x); },
+
+      draw(ctx) {
+        // speed lines
+        ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 2;
+        for (let i = 0; i < 12; i++) { const x = (i * 83 + 20) % W, y = ((performance.now() / 4 * (0.6 + i % 3 * 0.3) + i * 90) % H); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + 26); ctx.stroke(); }
+        // rocks
+        for (const o of objs) {
+          ctx.save(); ctx.translate(o.x, o.y); ctx.rotate(o.spin);
+          ctx.fillStyle = '#8a5a44'; ctx.beginPath();
+          for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, rr2 = o.r * (i % 2 ? 0.86 : 1.04); ctx.lineTo(Math.cos(a) * rr2, Math.sin(a) * rr2); }
+          ctx.closePath(); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.beginPath(); ctx.arc(-o.r * 0.3, -o.r * 0.3, o.r * 0.28, 0, Math.PI * 2); ctx.fill();
+          ctx.restore();
+          // fiery tail: a tapered flame trailing up and behind the rock
+          const tx = o.x - o.vx * 0.12, ty = o.y - o.vy * 0.12 - o.r;
+          const g = ctx.createLinearGradient(o.x, o.y - o.r, tx, ty);
+          g.addColorStop(0, 'rgba(255,170,60,.55)'); g.addColorStop(1, 'rgba(255,79,109,0)');
+          ctx.fillStyle = g; ctx.beginPath();
+          ctx.moveTo(o.x - o.r * 0.7, o.y - o.r * 0.6); ctx.lineTo(tx, ty); ctx.lineTo(o.x + o.r * 0.7, o.y - o.r * 0.6); ctx.closePath(); ctx.fill();
+        }
+        // player
+        trail.forEach(t => { ctx.globalAlpha = t.t * 1.2; ctx.fillStyle = '#ff4f6d'; ctx.beginPath(); ctx.arc(t.x, PY + 6, PR * 0.7, 0, Math.PI * 2); ctx.fill(); });
+        ctx.globalAlpha = 1;
+        ctx.shadowColor = '#ff4f6d'; ctx.shadowBlur = 16; ctx.fillStyle = '#ff7a93';
+        ctx.beginPath(); ctx.arc(player.x, PY, PR, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(player.x - 5, PY - 3, 3.5, 0, Math.PI * 2); ctx.arc(player.x + 5, PY - 3, 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#150d2b'; ctx.beginPath(); ctx.arc(player.x - 5, PY - 2, 1.6, 0, Math.PI * 2); ctx.arc(player.x + 5, PY - 2, 1.6, 0, Math.PI * 2); ctx.fill();
+        particles.draw(ctx);
+        texts.forEach(t => label(ctx, t.text, t.x, t.y, 22, '#ffd93d', 'center', clamp(t.t * 2, 0, 1)));
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Simon Says
+   Watch the pads light up, then repeat the pattern. Every round adds one step
+   and the playback gets faster. Score = longest pattern you got right.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'simon-says',
+  group: 'quick',
+  name: 'Simon Says',
+  emoji: '🎵',
+  color: '#ffd93d',
+  blurb: 'Watch the pattern, then repeat it.',
+  help: 'Tap the pads in the same order they lit up. On a keyboard use Q W / A S (or 1 2 3 4), laid out like the pads.',
+  size: [480, 540],
+
+  create(api) {
+    const { W } = api;
+    const PADS = [
+      { x: 32,  y: 70,  col: '#2fd16b', key: 'q' },
+      { x: 248, y: 70,  col: '#ff4f6d', key: 'w' },
+      { x: 32,  y: 286, col: '#ffd93d', key: 'a' },
+      { x: 248, y: 286, col: '#4aa8ff', key: 's' },
+    ];
+    const SIZE = 200;
+    let seq, st, idx, showI, phase, t, lit, msg;
+
+    const lightTime = () => Math.max(0.22, 0.52 - 0.02 * seq.length);     // playback speeds up
+    const gapTime = () => Math.max(0.12, 0.26 - 0.01 * seq.length);
+
+    function nextRound() {
+      seq.push(randInt(0, 3));
+      st = 'show'; showI = 0; phase = 'gap'; t = 0.7; idx = 0; lit = null;
+      msg = 'Watch…';
+      api.setInfo(`Pattern length ${seq.length}`);
+    }
+
+    function light(i, dur) { lit = { i, t: dur }; api.sound.play('simon', i); }
+
+    function press(i) {
+      if (st !== 'input') return;
+      light(i, 0.25);
+      if (i !== seq[idx]) {
+        st = 'fail'; msg = 'Wrong pad!'; api.sound.play('buzz');
+        setTimeout(() => api.end(`You got ${seq.length - 1} right`), 350);
+        return;
+      }
+      idx++;
+      if (idx === seq.length) {
+        api.setScore(seq.length);
+        st = 'between'; t = 0.9; msg = 'Nice!';
+        api.sound.play('match');
+      }
+    }
+
+    const game = {
+      reset() { seq = []; lit = null; nextRound(); },
+
+      update(dt) {
+        if (lit) { lit.t -= dt; if (lit.t <= 0) lit = null; }
+        if (st === 'show') {
+          t -= dt;
+          if (t > 0) return;
+          if (phase === 'gap') {
+            if (showI >= seq.length) { st = 'input'; msg = 'Your turn'; return; }
+            light(seq[showI], lightTime()); phase = 'lit'; t = lightTime();
+          } else {
+            phase = 'gap'; showI++; t = gapTime();
+          }
+        } else if (st === 'between') {
+          t -= dt; if (t <= 0) nextRound();
+        }
+      },
+
+      pointerdown(p) {
+        const i = PADS.findIndex(d => p.x >= d.x && p.x <= d.x + SIZE && p.y >= d.y && p.y <= d.y + SIZE);
+        if (i >= 0) press(i);
+      },
+      keydown(e, k) {
+        const i = PADS.findIndex((d, n) => d.key === k || k === String(n + 1));
+        if (i >= 0) press(i);
+      },
+
+      draw(ctx) {
+        PADS.forEach((d, i) => {
+          const on = lit && lit.i === i;
+          ctx.save();
+          if (on) { ctx.shadowColor = d.col; ctx.shadowBlur = 36; }
+          ctx.globalAlpha = on ? 1 : 0.38;
+          ctx.fillStyle = d.col; rr(ctx, d.x, d.y, SIZE, SIZE, 34); ctx.fill();
+          ctx.restore();
+          ctx.globalAlpha = 1;
+          if (on) { ctx.fillStyle = 'rgba(255,255,255,.35)'; rr(ctx, d.x + 10, d.y + 10, SIZE - 20, 50, 26); ctx.fill(); }
+          label(ctx, d.key.toUpperCase(), d.x + SIZE - 26, d.y + SIZE - 24, 20, 'rgba(255,255,255,.45)');
+        });
+        // centre disc with the status
+        ctx.fillStyle = '#120b26'; ctx.beginPath(); ctx.arc(W / 2, 286 - 8, 62, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,.2)'; ctx.lineWidth = 4; ctx.stroke();
+        label(ctx, String(seq.length), W / 2, 270, 46, '#fff');
+        label(ctx, 'steps', W / 2, 304, 15, 'rgba(255,255,255,.6)');
+        label(ctx, msg, W / 2, 40, 28, '#fff');
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Helpers shared by the 2-player games
+   -------------------------------------------------------------------------- */
+
+/** Like label(), but can be drawn upside down for the player sitting across the table. */
+function labelFlip(ctx, text, x, y, size, color, flip, alpha = 1) {
+  ctx.save();
+  ctx.translate(x, y);
+  if (flip) ctx.rotate(Math.PI);
+  label(ctx, text, 0, 0, size, color, 'center', alpha);
+  ctx.restore();
+}
+
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+
+/* --------------------------------------------------------------------------
+   Tug of War  (2 players)
+   Tap, tap, tap! Every tap drags the flag a little toward you, and it slowly
+   creeps back to the middle if you stop tapping while you're ahead. Drag it all the way to your side to
+   win the round. First to 2 rounds wins.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'tug-of-war',
+  group: 'two',
+  name: 'Tug of War',
+  emoji: '🪢',
+  color: '#ffa13d',
+  players: 2,
+  p1Color: '#ffd93d',
+  p2Color: '#2ee6d6',
+  blurb: 'Tap faster than your friend to drag the flag to your side.',
+  help: 'Best of 3 rounds. Player 1 (bottom): tap your half of the screen, or press A, S or D. Player 2 (top): tap your half, or press J, K or L. Wait for GO, then mash!',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const WIN_ROUNDS = 2, PULL = 0.065, DRIFT = 0.3, IDLE = 400;
+    const COL = ['#ffd93d', '#2ee6d6'];
+    const KEYS = [['a', 's', 'd'], ['j', 'k', 'l']];
+    const TOP = 120, BOT = H - 120;                         // where the flag stops if you win
+    const particles = makeParticles();
+    let m, wins, phase, t, pulse, lastTap, banner, round;      // m: -1 = Player 2's end (top), +1 = Player 1's end (bottom)
+
+    const flagY = () => H / 2 + m * (BOT - H / 2);
+
+    function startRound() {
+      m = 0; phase = 'count'; t = 2.4; pulse = [0, 0]; lastTap = [0, 0]; banner = null;
+      api.setInfo(`Round ${round}`);
+    }
+
+    function tap(i) {
+      if (phase !== 'pull') return;
+      const now = performance.now();
+      if (now - lastTap[i] < 30) return;                      // ignore a rolling key / double event
+      lastTap[i] = now;
+      m = clamp(m + (i === 0 ? 1 : -1) * PULL, -1, 1);
+      pulse[i] = 1;
+      api.sound.play('tap');
+    }
+
+    function roundWon(i) {
+      wins[i]++; api.setScores(wins[0], wins[1]);
+      particles.burst(W / 2, flagY(), COL[i], 30, 320);
+      api.sound.play('goal');
+      if (wins[i] >= WIN_ROUNDS) { phase = 'over'; api.endMatch(i + 1, `${wins[0]} rounds to ${wins[1]}`); return; }
+      phase = 'done'; t = 1.5; banner = `Player ${i + 1} takes the round!`; round++;
+    }
+
+    const game = {
+      reset() { wins = [0, 0]; round = 1; particles.clear(); api.setScores(0, 0); startRound(); },
+
+      update(dt) {
+        particles.update(dt);
+        pulse[0] = Math.max(0, pulse[0] - dt * 8); pulse[1] = Math.max(0, pulse[1] - dt * 8);
+        if (phase === 'count') {
+          const before = Math.ceil(t); t -= dt;
+          if (Math.ceil(t) !== before && t > 0) api.sound.play('beep');
+          if (t <= 0) { phase = 'pull'; api.sound.play('go'); }
+        } else if (phase === 'pull') {
+          // If the player who is winning stops tapping, the rope creeps back toward the middle.
+          // (While both keep mashing it doesn't, so being a little faster really does win.)
+          const lead = m > 0 ? 0 : m < 0 ? 1 : -1;
+          if (lead >= 0 && performance.now() - lastTap[lead] > IDLE) m -= Math.sign(m) * Math.min(Math.abs(m), DRIFT * dt);
+          if (m >= 1) roundWon(0); else if (m <= -1) roundWon(1);
+        } else if (phase === 'done') {
+          t -= dt; if (t <= 0) startRound();
+        }
+      },
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p) { tap(p.y > H / 2 ? 0 : 1); },
+      keydown(e, k) { KEYS.forEach((set, i) => { if (set.includes(k)) tap(i); }); },
+
+      draw(ctx) {
+        // each player's half, tinted with their colour
+        ctx.fillStyle = 'rgba(46,230,214,.07)'; ctx.fillRect(0, 0, W, H / 2);
+        ctx.fillStyle = 'rgba(255,217,61,.07)'; ctx.fillRect(0, H / 2, W, H / 2);
+        // finish lines
+        for (const [y, c] of [[TOP, COL[1]], [BOT, COL[0]]]) { ctx.fillStyle = c; ctx.globalAlpha = 0.5; ctx.fillRect(0, y - 2, W, 4); ctx.globalAlpha = 1; }
+        // the rope
+        ctx.strokeStyle = '#c9a26b'; ctx.lineWidth = 12; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(W / 2, 50); ctx.lineTo(W / 2, H - 50); ctx.stroke();
+        ctx.strokeStyle = 'rgba(0,0,0,.25)'; ctx.lineWidth = 3; ctx.setLineDash([6, 10]);
+        ctx.beginPath(); ctx.moveTo(W / 2, 50); ctx.lineTo(W / 2, H - 50); ctx.stroke(); ctx.setLineDash([]);
+        // centre mark
+        ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(W / 2 - 40, H / 2 - 2, 80, 4);
+        // the flag
+        const fy = flagY();
+        ctx.shadowColor = '#ffa13d'; ctx.shadowBlur = 18; ctx.fillStyle = '#ff5d5d';
+        ctx.beginPath(); ctx.moveTo(W / 2, fy - 22); ctx.lineTo(W / 2 + 46, fy); ctx.lineTo(W / 2, fy + 22); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.shadowBlur = 0; ctx.beginPath(); ctx.arc(W / 2, fy, 9, 0, Math.PI * 2); ctx.fill();
+        // the players: bigger when they've just tapped
+        [[0, H - 54], [1, 54]].forEach(([i, y]) => {
+          const r = 34 + pulse[i] * 8;
+          ctx.fillStyle = COL[i]; ctx.beginPath(); ctx.arc(W / 2, y, r, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#150d2b';
+          const dir = i === 0 ? -1 : 1;
+          ctx.beginPath(); ctx.arc(W / 2 - 11, y + dir * 6, 4.5, 0, Math.PI * 2); ctx.arc(W / 2 + 11, y + dir * 6, 4.5, 0, Math.PI * 2); ctx.fill();
+        });
+        // tap-zone hints, upside down for Player 2
+        if (phase === 'pull' || phase === 'count') {
+          labelFlip(ctx, api.isTouch() ? 'TAP!' : 'TAP!   A S D', W / 2 + 130, H - 150, 28, COL[0], false, 0.55);
+          labelFlip(ctx, api.isTouch() ? 'TAP!' : 'TAP!   J K L', W / 2 - 130, 150, 28, COL[1], true, 0.55);
+        }
+        particles.draw(ctx);
+        if (phase === 'count') label(ctx, t > 0.6 ? String(Math.ceil(t - 0.6)) : 'GO!', W / 2, H / 2 - 60, 90, '#fff');
+        if (phase === 'done') label(ctx, banner, W / 2, H / 2 - 70, 30, '#ffd93d');
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Light Cycles  (2 players)
+   Two bikes leave glowing trails. Don't hit a wall, a trail, or each other:
+   the last bike running wins the round. Steering is relative: "left" always
+   turns left from the bike's point of view. First to 3 rounds wins.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'light-cycles',
+  group: 'two',
+  name: 'Light Cycles',
+  emoji: '🏍️',
+  color: '#ff4fa3',
+  players: 2,
+  blurb: 'Trap your friend behind your glowing trail.',
+  help: 'First to 3 rounds. Turn left or right from your bike’s point of view. Player 1 (pink, bottom): A and D, or the bottom buttons. Player 2 (cyan, top): ← and →, or the top buttons.',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const COLS = 30, ROWS = 30, CS = 14, BX = 30, BY = 110, WIN_ROUNDS = 3;
+    const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];               // 0 up, 1 right, 2 down, 3 left
+    const COL = ['#ff4fa3', '#2ee6d6'];
+    const pad = makeTouchPad(api, [
+      { id: 'p1l', x: 30,  y: 556, w: 200, h: 70, label: '◀', color: COL[0] },
+      { id: 'p1r', x: 250, y: 556, w: 200, h: 70, label: '▶', color: COL[0] },
+      { id: 'p2l', x: 250, y: 14,  w: 200, h: 70, label: '◀', color: COL[1], flip: true },   // upside down: left for the player across the table
+      { id: 'p2r', x: 30,  y: 14,  w: 200, h: 70, label: '▶', color: COL[1], flip: true },
+    ]);
+    const particles = makeParticles();
+    let grid, bikes, phase, t, stepT, steps, wins, banner, round;
+
+    const idx = (x, y) => y * COLS + x;
+    const turn = (d, side) => (d + (side < 0 ? 3 : 1)) % 4;
+
+    function startRound() {
+      grid = new Uint8Array(COLS * ROWS);
+      bikes = [
+        { x: 14, y: 27, d: 0, q: [], alive: true },             // Player 1 starts at the bottom heading up
+        { x: 15, y: 2,  d: 2, q: [], alive: true },             // Player 2 starts at the top heading down
+      ];
+      bikes.forEach((b, i) => { grid[idx(b.x, b.y)] = i + 1; });
+      phase = 'count'; t = 2.1; steps = 0; stepT = 0; banner = null; pad.reset();
+      api.setInfo(`Round ${round}`);
+    }
+
+    const queueTurn = (i, side) => { const q = bikes[i].q; if (phase !== 'done' && q.length < 2) q.push(side); };
+
+    function step() {
+      bikes.forEach(b => { if (b.q.length) b.d = turn(b.d, b.q.shift()); });
+      const next = bikes.map(b => ({ x: b.x + DX[b.d], y: b.y + DY[b.d] }));
+      const dead = next.map(n => n.x < 0 || n.y < 0 || n.x >= COLS || n.y >= ROWS || grid[idx(n.x, n.y)] !== 0);
+      if (!dead[0] && !dead[1] && next[0].x === next[1].x && next[0].y === next[1].y) dead[0] = dead[1] = true;   // head-on
+      bikes.forEach((b, i) => {
+        if (dead[i]) { b.alive = false; particles.burst(BX + (b.x + 0.5) * CS, BY + (b.y + 0.5) * CS, COL[i], 28, 280); return; }
+        b.x = next[i].x; b.y = next[i].y; grid[idx(b.x, b.y)] = i + 1;
+      });
+      steps++;
+      if (dead[0] || dead[1]) {
+        api.sound.play('lose');
+        if (dead[0] && dead[1]) { phase = 'done'; t = 1.6; banner = 'Both crashed! Replay'; return; }
+        const w = dead[0] ? 1 : 0;
+        wins[w]++; api.setScores(wins[0], wins[1]);
+        if (wins[w] >= WIN_ROUNDS) { phase = 'over'; api.endMatch(w + 1, `${wins[0]} rounds to ${wins[1]}`); return; }
+        phase = 'done'; t = 1.6; banner = `Player ${w + 1} wins the round!`; round++;
+      }
+    }
+
+    const game = {
+      reset() { wins = [0, 0]; round = 1; particles.clear(); api.setScores(0, 0); startRound(); },
+
+      update(dt) {
+        particles.update(dt);
+        for (const [id, i, s] of [['p1l', 0, -1], ['p1r', 0, 1], ['p2l', 1, -1], ['p2r', 1, 1]]) if (pad.pressed(id)) queueTurn(i, s);
+        if (phase === 'count') {
+          const before = Math.ceil(t); t -= dt;
+          if (Math.ceil(t) !== before && t > 0) api.sound.play('beep');
+          if (t <= 0) { phase = 'run'; api.sound.play('go'); }
+        } else if (phase === 'run') {
+          stepT -= dt;
+          while (stepT <= 0 && phase === 'run') { step(); stepT += Math.max(0.055, 0.1 - steps * 0.0005); }   // the bikes slowly get faster
+        } else if (phase === 'done') {
+          t -= dt; if (t <= 0) startRound();
+        }
+      },
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p, e) { pad.down(p, e); },
+      pointermove(p, e) { pad.move(p, e); },
+      pointerup(p, e) { pad.up(p, e); },
+      keydown(e, k) {
+        if (k === 'a') queueTurn(0, -1); else if (k === 'd') queueTurn(0, 1);
+        else if (k === 'arrowleft') queueTurn(1, -1); else if (k === 'arrowright') queueTurn(1, 1);
+      },
+
+      draw(ctx) {
+        // board
+        ctx.fillStyle = '#0c0720'; ctx.fillRect(BX, BY, COLS * CS, ROWS * CS);
+        ctx.fillStyle = 'rgba(255,255,255,.06)';
+        for (let x = 0; x <= COLS; x += 1) for (let y = 0; y <= ROWS; y += 3) ctx.fillRect(BX + x * CS - 1, BY + y * CS - 1, 2, 2);
+        ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 3; ctx.strokeRect(BX - 1.5, BY - 1.5, COLS * CS + 3, ROWS * CS + 3);
+        // trails
+        for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+          const v = grid[idx(x, y)];
+          if (!v) continue;
+          ctx.fillStyle = COL[v - 1]; ctx.globalAlpha = 0.75;
+          ctx.fillRect(BX + x * CS + 1, BY + y * CS + 1, CS - 2, CS - 2);
+        }
+        ctx.globalAlpha = 1;
+        // heads
+        bikes.forEach((b, i) => {
+          if (!b.alive) return;
+          ctx.shadowColor = COL[i]; ctx.shadowBlur = 16; ctx.fillStyle = '#fff';
+          ctx.fillRect(BX + b.x * CS - 1, BY + b.y * CS - 1, CS + 2, CS + 2); ctx.shadowBlur = 0;
+        });
+        particles.draw(ctx);
+        pad.draw(ctx);
+        if (!api.isTouch()) {                                     // keyboard reminders where the touch buttons would be
+          labelFlip(ctx, 'Player 1:  A  D', W / 2, H - 60, 22, COL[0], false, 0.8);
+          labelFlip(ctx, 'Player 2:  ←  →', W / 2, 54, 22, COL[1], true, 0.8);
+        }
+        if (phase === 'count') label(ctx, t > 0.5 ? String(Math.ceil(t - 0.5)) : 'GO!', W / 2, BY + ROWS * CS / 2, 100, '#fff');
+        if (phase === 'done') { ctx.fillStyle = 'rgba(14,8,32,.65)'; ctx.fillRect(BX, BY + 170, COLS * CS, 80); label(ctx, banner, W / 2, BY + 210, 30, '#ffd93d'); }
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Air Hockey  (2 players)
+   Slide your mallet to whack the puck into the other goal. First to 7.
+   Mallets can't cross the centre line. Touch: each player drags in their own half.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'air-hockey',
+  group: 'two',
+  name: 'Air Hockey',
+  emoji: '🏒',
+  color: '#4aa8ff',
+  players: 2,
+  p1Color: '#ff6b6b',
+  p2Color: '#4aa8ff',
+  blurb: 'Whack the puck into your friend’s goal. First to 7.',
+  help: 'Player 1 (bottom, red): drag in the bottom half, or use W A S D. Player 2 (top, blue): drag in the top half, or use the arrow keys. With a mouse, move it over your half.',
+  size: [480, 720],
+
+  create(api) {
+    const { W, H } = api;
+    const PR = 17, MR = 33, GOAL = 170, WIN = 7, MAXV = 1150, SUB = 4;
+    const COL = ['#ff6b6b', '#4aa8ff'];
+    const HOME = [{ x: W / 2, y: H - 110 }, { x: W / 2, y: 110 }];
+    const mallets = [0, 1].map(i => ({ x: HOME[i].x, y: HOME[i].y, tx: HOME[i].x, ty: HOME[i].y, vx: 0, vy: 0 }));
+    const owner = new Map();
+    const particles = makeParticles();
+    let puck, goals, pause, banner, pendingServe = 0;
+
+    const clampMallet = (i, x, y) => ({
+      x: clamp(x, MR, W - MR),
+      y: i === 0 ? clamp(y, H / 2 + MR, H - MR) : clamp(y, MR, H / 2 - MR),
+    });
+    const aim = (i, x, y) => { const c = clampMallet(i, x, y); mallets[i].tx = c.x; mallets[i].ty = c.y; };
+
+    function serve(toward) {                                     // the player who just conceded gets the puck on their side
+      puck = { x: W / 2, y: H / 2 + (toward === 0 ? 120 : -120), vx: 0, vy: 0 };
+      mallets.forEach((m, i) => { m.x = m.tx = HOME[i].x; m.y = m.ty = HOME[i].y; m.vx = m.vy = 0; });
+    }
+
+    function goal(scorer) {
+      goals[scorer]++; api.setScores(goals[0], goals[1]);
+      api.sound.play('goal');
+      particles.burst(puck.x, scorer === 0 ? 6 : H - 6, COL[scorer], 34, 340);
+      if (goals[scorer] >= WIN) { pause = 99; api.endMatch(scorer + 1, `Final score ${goals[0]} to ${goals[1]}`); puck.vx = puck.vy = 0; puck.y = H / 2; return; }
+      pause = 1.1; banner = `Goal for Player ${scorer + 1}!`;
+      puck.vx = puck.vy = 0; puck.y = scorer === 0 ? -100 : H + 100;     // hide it until the serve
+      pendingServe = 1 - scorer;
+    }
+
+    function collideMallet(i) {
+      const m = mallets[i];
+      let dx = puck.x - m.x, dy = puck.y - m.y, d = Math.hypot(dx, dy);
+      const minD = PR + MR;
+      if (d >= minD) return;
+      if (d < 0.001) { dx = 0; dy = i === 0 ? -1 : 1; d = 1; }
+      const nx = dx / d, ny = dy / d;
+      puck.x = m.x + nx * minD; puck.y = m.y + ny * minD;          // push the puck out of the mallet
+      const rel = (puck.vx - m.vx) * nx + (puck.vy - m.vy) * ny;   // closing speed along the contact normal
+      if (rel < 0) { puck.vx -= 1.9 * rel * nx; puck.vy -= 1.9 * rel * ny; }
+      // never let a hit be limp: make sure the puck leaves at least a little faster than it arrived
+      const sp = Math.hypot(puck.vx, puck.vy);
+      if (sp < 180) { puck.vx += nx * 180; puck.vy += ny * 180; }
+      if (api.sound) api.sound.play('paddle');
+    }
+
+    const game = {
+      reset() {
+        goals = [0, 0]; pause = 0; banner = null; owner.clear(); particles.clear();
+        api.setScores(0, 0); serve(Math.random() < 0.5 ? 0 : 1);
+      },
+
+      update(dt) {
+        particles.update(dt);
+        // keyboard moves the target
+        const k = api.input.keys, sp = 520 * dt;
+        const kd = (a, b) => (k.has(b) ? 1 : 0) - (k.has(a) ? 1 : 0);
+        const p1x = kd('a', 'd'), p1y = kd('w', 's'), p2x = kd('arrowleft', 'arrowright'), p2y = kd('arrowup', 'arrowdown');
+        if (p1x || p1y) aim(0, mallets[0].tx + p1x * sp, mallets[0].ty + p1y * sp);
+        if (p2x || p2y) aim(1, mallets[1].tx + p2x * sp, mallets[1].ty + p2y * sp);
+
+        if (pause > 0 && pause < 90) { pause -= dt; if (pause <= 0) { serve(pendingServe); banner = null; } }
+        const h = dt / SUB;
+        for (let s = 0; s < SUB; s++) {
+          mallets.forEach(m => {                                   // glide to the target, keeping a real velocity for the hit
+            const dx = m.tx - m.x, dy = m.ty - m.y, d = Math.hypot(dx, dy), step = Math.min(d, 2400 * h);
+            const nx = d > 0 ? dx / d * step : 0, ny = d > 0 ? dy / d * step : 0;
+            m.x += nx; m.y += ny; m.vx = nx / h; m.vy = ny / h;
+          });
+          if (pause > 0) continue;
+          puck.x += puck.vx * h; puck.y += puck.vy * h;
+          const f = Math.exp(-0.45 * h); puck.vx *= f; puck.vy *= f;      // a little air friction
+          // side walls
+          if (puck.x < PR)     { puck.x = PR;     puck.vx =  Math.abs(puck.vx) * 0.94; api.sound.play('wall'); }
+          if (puck.x > W - PR) { puck.x = W - PR; puck.vx = -Math.abs(puck.vx) * 0.94; api.sound.play('wall'); }
+          // end walls, with a slot for each goal
+          const inSlot = Math.abs(puck.x - W / 2) < GOAL / 2 - 8;
+          if (!inSlot) {
+            if (puck.y < PR)     { puck.y = PR;     puck.vy =  Math.abs(puck.vy) * 0.94; api.sound.play('wall'); }
+            if (puck.y > H - PR) { puck.y = H - PR; puck.vy = -Math.abs(puck.vy) * 0.94; api.sound.play('wall'); }
+          }
+          collideMallet(0); collideMallet(1);
+          const v = Math.hypot(puck.vx, puck.vy);
+          if (v > MAXV) { puck.vx *= MAXV / v; puck.vy *= MAXV / v; }
+          if (puck.y < -PR * 0.5) { goal(0); continue; }
+          if (puck.y > H + PR * 0.5) { goal(1); continue; }
+        }
+      },
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p, e) { const i = p.y > H / 2 ? 0 : 1; owner.set(e.pointerId, i); aim(i, p.x, p.y); },
+      pointermove(p, e) {
+        if (owner.has(e.pointerId)) aim(owner.get(e.pointerId), p.x, p.y);
+        else if (e.pointerType === 'mouse') aim(p.y > H / 2 ? 0 : 1, p.x, p.y);   // a mouse just hovers over the half it's in
+      },
+      pointerup(p, e) { owner.delete(e.pointerId); },
+
+      draw(ctx) {
+        // rink markings
+        ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(0, H / 2); ctx.lineTo(W, H / 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W / 2, H / 2, 70, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W / 2, 0, GOAL / 2 + 24, 0, Math.PI); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W / 2, H, GOAL / 2 + 24, Math.PI, Math.PI * 2); ctx.stroke();
+        label(ctx, goals[1], 52, H / 2 - 60, 80, 'rgba(255,255,255,.1)');
+        label(ctx, goals[0], 52, H / 2 + 60, 80, 'rgba(255,255,255,.1)');
+        // goals
+        for (const [y, c] of [[0, COL[1]], [H - 6, COL[0]]]) {
+          ctx.fillStyle = c; ctx.globalAlpha = 0.9; ctx.fillRect(W / 2 - GOAL / 2, y, GOAL, 6); ctx.globalAlpha = 1;
+        }
+        // mallets
+        mallets.forEach((m, i) => {
+          ctx.shadowColor = COL[i]; ctx.shadowBlur = 18;
+          ctx.fillStyle = COL[i]; ctx.beginPath(); ctx.arc(m.x, m.y, MR, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+          ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.arc(m.x, m.y, MR * 0.62, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.arc(m.x - MR * 0.25, m.y - MR * 0.25, MR * 0.2, 0, Math.PI * 2); ctx.fill();
+        });
+        // puck
+        ctx.shadowColor = '#fff'; ctx.shadowBlur = 14; ctx.fillStyle = '#f4f1ff';
+        ctx.beginPath(); ctx.arc(puck.x, puck.y, PR, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#9d92c9'; ctx.beginPath(); ctx.arc(puck.x, puck.y, PR * 0.55, 0, Math.PI * 2); ctx.fill();
+        particles.draw(ctx);
+        labelFlip(ctx, 'Player 2', W - 60, 24, 15, 'rgba(74,168,255,.8)', true);
+        labelFlip(ctx, 'Player 1', W - 60, H - 24, 15, 'rgba(255,107,107,.8)', false);
+        if (banner) label(ctx, banner, W / 2, H / 2 - 20, 38, '#ffd93d');
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Quick Draw  (2 players)
+   Wait for DRAW! then tap before your friend does. Jump the gun and you lose
+   the round. In later rounds the screen may try to fool you with a fake-out.
+   First to 3 rounds wins.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'quick-draw',
+  group: 'two',
+  name: 'Quick Draw',
+  emoji: '🤠',
+  color: '#ff8a3d',
+  players: 2,
+  p1Color: '#ffd93d',
+  p2Color: '#2ee6d6',
+  blurb: 'Wait for it… then draw faster than your friend.',
+  help: 'First to 3 rounds. Wait for DRAW!, then tap your half of the screen (Player 1, bottom: A S D; Player 2, top: J K L). Tap too early and you lose the round. Beware the fake-out!',
+  size: [480, 640],
+
+  create(api) {
+    const { W, H } = api;
+    const WIN_ROUNDS = 3;
+    const COL = ['#ffd93d', '#2ee6d6'];
+    const KEYS = [['a', 's', 'd'], ['j', 'k', 'l']];
+    const particles = makeParticles();
+    let phase, t, wait, fakeAt, fakeT, goAt, wins, round, result, flash;
+
+    function startRound() {
+      phase = 'wait'; t = 0; result = null; flash = 0;
+      const fake = round >= 3 && Math.random() < 0.55;
+      wait = rand(1.6, 4.2) + (fake ? 1 : 0);
+      fakeAt = fake ? rand(0.8, 1.6) : -1; fakeT = 0;
+      api.setInfo(`Round ${round}`);
+    }
+
+    function finish(winner, text) {
+      phase = 'result'; t = 2.0;
+      result = { winner, text };
+      if (winner < 0) { api.sound.play('buzz'); return; }
+      wins[winner]++; api.setScores(wins[0], wins[1]);
+      api.sound.play('whack');
+      particles.burst(W / 2, winner === 0 ? H * 0.3 : H * 0.7, COL[winner], 24, 300);
+      if (wins[winner] >= WIN_ROUNDS) { phase = 'over'; api.endMatch(winner + 1, `${wins[0]} rounds to ${wins[1]}`); return; }
+      round++;
+    }
+
+    function pull(i) {
+      if (phase === 'wait') {                                  // fired too early (including during the fake-out)
+        finish(1 - i, `Player ${i + 1} jumped the gun!`);
+      } else if (phase === 'draw') {
+        const ms = Math.round(performance.now() - goAt);
+        finish(i, `Player ${i + 1} was ${ms} ms`);
+      }
+    }
+
+    const game = {
+      reset() { wins = [0, 0]; round = 1; particles.clear(); api.setScores(0, 0); startRound(); },
+
+      update(dt) {
+        particles.update(dt);
+        flash = Math.max(0, flash - dt * 3);
+        if (phase === 'wait') {
+          t += dt;
+          if (fakeAt >= 0 && t >= fakeAt && t < fakeAt + 0.5) fakeT = 1; else fakeT = 0;
+          if (t >= wait) { phase = 'draw'; goAt = performance.now(); t = 0; flash = 1; api.sound.play('go'); }
+        } else if (phase === 'draw') {
+          t += dt;
+          if (t > 4) { phase = 'result'; t = 1.6; result = { winner: -1, text: 'Nobody drew! Replay' }; }    // both asleep
+        } else if (phase === 'result') {
+          t -= dt;
+          if (t <= 0) startRound();
+        }
+      },
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p) { pull(p.y > H / 2 ? 0 : 1); },
+      keydown(e, k) { KEYS.forEach((set, i) => { if (set.includes(k)) pull(i); }); },
+
+      draw(ctx) {
+        const live = phase === 'draw';
+        // each half: a desert-sunset colour; the whole board flashes on DRAW
+        ctx.fillStyle = live ? '#d94a1f' : '#2a1646'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = live ? '#ff8a3d' : '#3a1d5e'; ctx.fillRect(0, H / 2 - 3, W, 6);
+        if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, W, H); }
+        // the cowboys
+        ctx.font = `90px ${EMOJI_FONT}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('🤠', W / 2, H - 120);
+        ctx.save(); ctx.translate(W / 2, 120); ctx.rotate(Math.PI); ctx.fillText('🤠', 0, 0); ctx.restore();
+        labelFlip(ctx, 'Player 1', W / 2, H - 50, 22, COL[0], false, 0.9);
+        labelFlip(ctx, 'Player 2', W / 2, 50, 22, COL[1], true, 0.9);
+        if (!api.isTouch()) {
+          labelFlip(ctx, 'A S D', W - 60, H - 50, 18, COL[0], false, 0.6);
+          labelFlip(ctx, 'J K L', 60, 50, 18, COL[1], true, 0.6);
+        }
+        // centre message
+        let msg = '', col = '#fff', size = 54;
+        if (phase === 'wait') { msg = fakeT ? 'Not yet…' : 'Steady…'; col = fakeT ? '#ffd93d' : '#fff'; size = 50; }
+        else if (phase === 'draw') { msg = 'DRAW!'; size = 96; }
+        else if (result) { msg = result.winner < 0 ? '' : '💥'; }
+        label(ctx, msg, W / 2, H / 2, size, col);
+        if (result) {
+          const y = result.winner < 0 ? H / 2 : (result.winner === 0 ? H / 2 + 60 : H / 2 - 60);
+          if (phase !== 'wait') labelFlip(ctx, result.text, W / 2, y, 26, result.winner < 0 ? '#ffd93d' : COL[result.winner], result.winner === 1);
+        }
+        particles.draw(ctx);
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Connect Four  (2 players, taking turns)
+   Drop discs into the grid. Get four in a row (across, up-and-down, or
+   diagonally) before your friend does.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'connect-four',
+  group: 'two',
+  name: 'Connect Four',
+  emoji: '🔴',
+  color: '#3a7bff',
+  players: 2,
+  scoreboard: false,
+  p1Color: '#ff4f6d',
+  p2Color: '#ffd93d',
+  blurb: 'Line up four discs before your friend does.',
+  help: 'Take turns. Tap or click a column to drop a disc. Keyboard: ← → to choose a column, then Space, Enter or ↓ to drop. Players swap who goes first each game.',
+  size: [480, 500],
+
+  create(api) {
+    const { W, H } = api;
+    const COLS = 7, ROWS = 6, S = 62, X0 = (W - COLS * S) / 2, Y0 = 92;
+    const COL = ['#ff4f6d', '#ffd93d'];
+    const particles = makeParticles();
+    let board, turn, col, falling, winCells, over, starter = 0, tick = 0, usedMouse;
+
+    const cx = c => X0 + c * S + S / 2, cy = r => Y0 + r * S + S / 2;
+    const colAt = x => clamp(Math.floor((x - X0) / S), 0, COLS - 1);
+    const setInfo = () => api.setInfo(over ? '' : `Player ${turn + 1}’s turn`);
+
+    /** Find a winning line through the disc just placed, or null. */
+    function findWin(r, c, p) {
+      for (const [dr, dc] of [[0, 1], [1, 0], [1, 1], [1, -1]]) {
+        const line = [[r, c]];
+        for (const sgn of [1, -1]) {
+          let rr2 = r + dr * sgn, cc = c + dc * sgn;
+          while (rr2 >= 0 && rr2 < ROWS && cc >= 0 && cc < COLS && board[rr2][cc] === p) { line.push([rr2, cc]); rr2 += dr * sgn; cc += dc * sgn; }
+        }
+        if (line.length >= 4) return line;
+      }
+      return null;
+    }
+
+    function drop(c) {
+      if (falling || over) return;
+      let r = ROWS - 1;
+      while (r >= 0 && board[r][c] !== 0) r--;
+      if (r < 0) { api.sound.play('buzz'); return; }            // column is full
+      board[r][c] = turn + 1;                                   // reserve the slot now; the disc animates down to it
+      falling = { c, r, y: Y0 - S / 2, vy: 0, p: turn };
+    }
+
+    function landed() {
+      const { r, c, p } = falling; falling = null;
+      api.sound.play('thud', 400);
+      particles.burst(cx(c), cy(r) + S / 3, COL[p], 8, 120);
+      const line = findWin(r, c, p + 1);
+      if (line) {
+        winCells = line; over = true; starter = 1 - p; setInfo();
+        for (const [rr2, cc] of line) particles.burst(cx(cc), cy(rr2), COL[p], 10, 220);
+        api.endMatch(p + 1, 'Four in a row!');
+      } else if (board.every(row => row.every(v => v))) {
+        over = true; starter = 1 - starter; setInfo();
+        api.endMatch(0, 'The board is full.');
+      } else { turn = 1 - turn; setInfo(); }
+    }
+
+    const game = {
+      reset() {
+        board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+        turn = starter; col = 3; falling = null; winCells = null; over = false; usedMouse = false; tick = 0; particles.clear();
+        setInfo();
+      },
+
+      update(dt) {
+        tick += dt; particles.update(dt);
+        if (falling) {
+          falling.vy += 2600 * dt; falling.y += falling.vy * dt;
+          const target = cy(falling.r);
+          if (falling.y >= target) { falling.y = target; landed(); }
+        }
+      },
+      idle(dt) { tick += dt; particles.update(dt); },
+
+      pointerdown(p, e) { usedMouse = true; col = colAt(p.x); drop(col); },
+      pointermove(p, e) { if (e.pointerType === 'mouse') { usedMouse = true; col = colAt(p.x); } },
+      keydown(e, k) {
+        usedMouse = false;
+        if (k === 'arrowleft') col = (col + COLS - 1) % COLS;
+        else if (k === 'arrowright') col = (col + 1) % COLS;
+        else if (k === ' ' || k === 'enter' || k === 'arrowdown') drop(col);
+        else if (k >= '1' && k <= '7') { col = Number(k) - 1; drop(col); }
+      },
+
+      draw(ctx) {
+        const who = falling ? falling.p : turn;
+        // the disc hovering above the board shows whose turn it is and where it will land
+        if (!over && !falling) {
+          const hx = cx(col), hy = Y0 - S / 2 + Math.sin(tick * 6) * 2;
+          ctx.shadowColor = COL[turn]; ctx.shadowBlur = 14; ctx.fillStyle = COL[turn];
+          ctx.beginPath(); ctx.arc(hx, hy, S / 2 - 7, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+          ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.fillRect(X0 + col * S, Y0, S, ROWS * S);        // highlight the chosen column
+        }
+        // discs sit behind the board so the holes show them
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const v = board[r][c];
+          if (!v || (falling && falling.r === r && falling.c === c)) continue;
+          ctx.fillStyle = COL[v - 1]; ctx.beginPath(); ctx.arc(cx(c), cy(r), S / 2 - 7, 0, Math.PI * 2); ctx.fill();
+        }
+        if (falling) { ctx.fillStyle = COL[falling.p]; ctx.beginPath(); ctx.arc(cx(falling.c), falling.y, S / 2 - 7, 0, Math.PI * 2); ctx.fill(); }
+        // the board: a blue slab with round holes punched out (even-odd fill)
+        rr(ctx, X0 - 10, Y0 - 6, COLS * S + 20, ROWS * S + 16, 18);
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { ctx.moveTo(cx(c) + S / 2 - 7, cy(r)); ctx.arc(cx(c), cy(r), S / 2 - 7, 0, Math.PI * 2); }
+        ctx.fillStyle = '#2f5be0'; ctx.fill('evenodd');
+        ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(X0 - 6, Y0 - 2); ctx.lineTo(X0 + COLS * S + 6, Y0 - 2); ctx.stroke();
+        // winning four
+        if (winCells) for (const [r, c] of winCells) {
+          ctx.strokeStyle = '#fff'; ctx.lineWidth = 5; ctx.globalAlpha = 0.6 + 0.4 * Math.sin(tick * 10);
+          ctx.beginPath(); ctx.arc(cx(c), cy(r), S / 2 - 3, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+        }
+        particles.draw(ctx);
+        if (!over) label(ctx, `Player ${who + 1}`, W / 2, 24, 24, COL[who]);
+        if (!usedMouse && !over && !api.isTouch()) label(ctx, '← →  then  Space', W / 2, H - 14, 16, 'rgba(255,255,255,.45)');
+      },
+    };
+    return game;
+  },
+});
+
+
+/* --------------------------------------------------------------------------
+   Big Head Soccer  (1 or 2 players)
+   Giant heads, tiny feet. Run, jump, head the ball and swing your foot to
+   knock it into the other goal. First to 5 goals wins, or whoever is ahead
+   when the 60-second clock runs out (a tie goes to a golden goal).
+
+   1 player: you are the yellow player on the left against the computer.
+   Every match you win scores 1, and the next computer opponent is quicker.
+   2 players: Player 1 (yellow, left) and Player 2 (pink, right) share the screen.
+   -------------------------------------------------------------------------- */
+registerGame({
+  id: 'head-soccer',
+  group: 'two',
+  name: 'Big Head Soccer',
+  emoji: '⚽',
+  color: '#2fd16b',
+  players: 'both',
+  p1Color: '#ffd93d',
+  p2Color: '#ff4f6d',
+  blurb: 'Giant heads, tiny feet. Beat the computer or a friend.',
+  help: 'First to 5 goals, or lead when 60 seconds are up (a tie is settled by a golden goal). 1 player: A D or ← → to run, W or ↑ to jump, S, Space or ↓ to kick. 2 players: Player 1 (yellow) A D W and S or Space; Player 2 (pink) ← → ↑ and ↓ or Enter. On touch, use the buttons under the pitch.',
+  size: [800, 580],
+
+  create(api) {
+    const { W, H } = api;
+    const PITCH = 470, GROUND = 420, GW = 70, GH = 150;               // pitch height, grass line, goal width, goal height
+    const HR = 34, FR = 14, BR = 22, LEG = 58;                        // head, foot and ball radius; leg length
+    const STAND = GROUND - HR - 20;                                   // head-centre height when standing
+    const MINX = GW + HR, MAXX = W - GW - HR;
+    const MATCH_TIME = 60, WIN_GOALS = 5, KICK_T = 0.3, SUB = 4;
+    const RUN = 360, JUMP = 840, GRAV_P = 2400, GRAV_B = 1150, MAX_BALL = 1050;
+    const COL = ['#ffd93d', '#ff4f6d'];
+    const SKIN = ['#ffd2a8', '#d9a073'];
+    const particles = makeParticles();
+    const mk = i => ({ i, dir: i === 0 ? 1 : -1, x: 0, y: STAND, vx: 0, vy: 0, kickT: 0, cool: 0, foot: { x: 0, y: 0, vx: 0, vy: 0 } });
+    const pl = [mk(0), mk(1)];
+    const ai = { t: 0, react: 0.3, err: 60, speed: 200, seen: { x: W / 2, y: 0, vx: 0, vy: 0 } };
+    const latch = [{ j: false, k: false }, { j: false, k: false }];   // jump/kick presses remembered until the next frame, so a very quick tap is never missed
+    let ball, goals, clock, golden, st, stT, banner, match, pad, intents;
+
+    const solo = () => api.mode === '1p';
+
+    /* ---------- touch buttons (rebuilt per mode: 1 player gets bigger, thumb-friendly ones) ---------- */
+    function buttonsFor(mode) {
+      const y = 480, h = 90, B = (id, x, w, label, color, flip) => ({ id, x, y, w, h, label, color });
+      if (mode === '1p') return [B('p1l', 14, 96, '◀', COL[0]), B('p1r', 118, 96, '▶', COL[0]), B('p1j', 590, 96, '▲', COL[0]), B('p1k', 694, 92, '⚽', COL[0])];
+      return [
+        B('p1l', 14, 88, '◀', COL[0]), B('p1r', 108, 88, '▶', COL[0]), B('p1j', 202, 88, '▲', COL[0]), B('p1k', 296, 88, '⚽', COL[0]),
+        B('p2l', 416, 88, '◀', COL[1]), B('p2r', 510, 88, '▶', COL[1]), B('p2j', 604, 88, '▲', COL[1]), B('p2k', 698, 88, '⚽', COL[1]),
+      ];
+    }
+
+    /* ---------- the computer opponent ---------- */
+    function aiThink(dt) {
+      const p = pl[1];
+      ai.t -= dt;
+      if (ai.t <= 0) {                                               // it only "sees" the ball every so often, and a bit wrongly
+        ai.t = ai.react;
+        ai.seen = { x: ball.x + rand(-1, 1) * ai.err, y: ball.y, vx: ball.vx, vy: ball.vy };
+      }
+      const b = ai.seen;
+      const chase = b.x > W / 2 - 50 || b.vx > 150;                  // go for it when it's on, or heading to, our half
+      const inFront = ball.x < p.x - 16;                             // ball is between me and the player's goal: I can kick it away
+      let target = chase ? clamp(b.x + b.vx * 0.2 + 44, MINX, MAXX) : W - 160;   // stand just behind the ball so a kick sends it left
+      // Never run INTO a ball that is in front of us from the left (that would push it toward our own goal): hold position and let it come
+      if (inFront && chase && target > p.x) target = p.x;
+      const behindBall = !inFront && ball.x > p.x + 8;               // ball slipped behind us: hop over it instead of shoving it into our goal
+      if (behindBall) target = Math.min(MAXX, ball.x + 80);
+      const dx = target - p.x;
+      const bd = Math.hypot(ball.x - p.x, ball.y - p.y);
+      return {
+        l: dx < -14, r: dx > 14,
+        j: p.y >= STAND - 1 && ((chase && b.y < GROUND - 130 && Math.abs(b.x - p.x) < 70 && b.vy > -150) || (behindBall && Math.abs(ball.x - p.x) < 100)),
+        k: bd < 104 && ball.x < p.x + 12,
+      };
+    }
+
+    /* ---------- reading controls ---------- */
+    function readIntents(dt) {
+      const k = api.input.keys, any = (...names) => names.some(n => k.has(n));
+      const T = (i, id) => pad.pressed(id) || latch[i][id.endsWith('j') ? 'j' : 'k'];
+      if (solo()) {
+        intents = [{
+          l: any('a', 'arrowleft') || pad.isDown('p1l'), r: any('d', 'arrowright') || pad.isDown('p1r'),
+          j: any('w', 'arrowup') || pad.isDown('p1j') || T(0, 'p1j'), k: any('s', 'arrowdown', ' ', 'enter') || pad.isDown('p1k') || T(0, 'p1k'),
+        }, aiThink(dt)];
+      } else {
+        intents = [
+          { l: any('a') || pad.isDown('p1l'), r: any('d') || pad.isDown('p1r'), j: any('w') || pad.isDown('p1j') || T(0, 'p1j'), k: any('s', ' ') || pad.isDown('p1k') || T(0, 'p1k') },
+          { l: any('arrowleft') || pad.isDown('p2l'), r: any('arrowright') || pad.isDown('p2r'), j: any('arrowup') || pad.isDown('p2j') || T(1, 'p2j'), k: any('arrowdown', 'enter') || pad.isDown('p2k') || T(1, 'p2k') },
+        ];
+      }
+      latch.forEach(l => { l.j = l.k = false; });
+    }
+
+    /* ---------- geometry ---------- */
+    const phi = p => p.kickT > 0 ? 0.5 + 1.55 * Math.sin(Math.PI * (1 - p.kickT / KICK_T)) : 0.5;   // leg angle: swings forward and back
+    function footTarget(p) {
+      const a = phi(p);
+      return { x: p.x + p.dir * Math.sin(a) * LEG, y: Math.min(p.y + Math.cos(a) * LEG, GROUND - FR) };
+    }
+
+    function resetPositions() {
+      pl[0].x = 230; pl[1].x = W - 230;
+      pl.forEach(p => { p.y = STAND; p.vx = p.vy = 0; p.kickT = 0; p.cool = 0; const f = footTarget(p); p.foot = { x: f.x, y: f.y, vx: 0, vy: 0 }; });
+      ball = { x: W / 2, y: 150, vx: 0, vy: 0, rot: 0 };
+    }
+
+    function kickoff() { resetPositions(); st = 'kickoff'; stT = 1.1; banner = null; }
+
+    function updateInfo() { api.setInfo(solo() ? `Match ${match}` : ''); }
+
+    /* ---------- ball vs a circle (a head or a foot); the circle is much heavier than the ball ---------- */
+    function hitCircle(cx, cy, cr, cvx, cvy, e) {
+      let dx = ball.x - cx, dy = ball.y - cy, d = Math.hypot(dx, dy);
+      const min = BR + cr;
+      if (d >= min) return false;
+      if (d < 0.001) { dx = 0; dy = -1; d = 1; }
+      const nx = dx / d, ny = dy / d;
+      ball.x = cx + nx * min; ball.y = cy + ny * min;                // push the ball out
+      const rel = (ball.vx - cvx) * nx + (ball.vy - cvy) * ny;       // closing speed
+      if (rel < 0) { ball.vx -= (1 + e) * rel * nx; ball.vy -= (1 + e) * rel * ny; }
+      return true;
+    }
+    function hitRect(rx, ry, rw, rh, e) {                            // the crossbars
+      const cx = clamp(ball.x, rx, rx + rw), cy = clamp(ball.y, ry, ry + rh);
+      let dx = ball.x - cx, dy = ball.y - cy, d = Math.hypot(dx, dy);
+      if (d >= BR) return;
+      if (d < 0.001) { dx = 0; dy = -1; d = 1; }
+      const nx = dx / d, ny = dy / d;
+      ball.x = cx + nx * BR; ball.y = cy + ny * BR;
+      const vn = ball.vx * nx + ball.vy * ny;
+      if (vn < 0) { ball.vx -= (1 + e) * vn * nx; ball.vy -= (1 + e) * vn * ny; api.sound.play('tink'); }
+    }
+
+    function scored(i) {
+      goals[i]++; api.setScores(goals[0], goals[1]);
+      api.sound.play('goal');
+      particles.burst(i === 0 ? W - 40 : 40, GROUND - 60, COL[i], 40, 380);
+      banner = golden ? 'GOLDEN GOAL!' : 'GOAL!';
+      const decided = golden || goals[i] >= WIN_GOALS;
+      st = 'goal'; stT = 1.7;
+      if (decided) finish(i);
+    }
+
+    function finish(winner) {                                        // winner 0/1 (player index)
+      if (!solo()) { st = 'over'; api.endMatch(winner + 1, `Final score ${goals[0]} to ${goals[1]}`); return; }
+      if (winner === 1) { st = 'over'; api.end('The computer wins'); return; }
+      api.addScore(1);                                               // you won the match: face a tougher opponent
+      match++;
+      ai.speed = Math.min(380, 200 + 26 * (match - 1)); ai.react = Math.max(0.05, 0.3 - 0.045 * (match - 1)); ai.err = Math.max(4, 60 - 9 * (match - 1));
+      goals = [0, 0]; api.setScores(0, 0); clock = MATCH_TIME; golden = false;
+      updateInfo();
+      api.sound.play('levelup');
+      st = 'goal'; stT = 1.7; banner = `Match ${match}`;
+    }
+
+    /* ---------- one frame of physics ---------- */
+    function step(dt) {
+      readIntents(dt);
+      const speed = [RUN, solo() ? ai.speed : RUN];
+      pl.forEach((p, i) => {
+        const it = intents[i];
+        p.vx = ((it.r ? 1 : 0) - (it.l ? 1 : 0)) * speed[i];
+        if (it.j && p.y >= STAND - 1) { p.vy = -JUMP; api.sound.play('tick'); }
+        p.cool = Math.max(0, p.cool - dt);
+        if (it.k && p.kickT <= 0 && p.cool <= 0) { p.kickT = KICK_T; p.cool = KICK_T + 0.1; api.sound.play('kick'); }
+        p.kickT = Math.max(0, p.kickT - dt);
+      });
+
+      const h = dt / SUB;
+      for (let s = 0; s < SUB; s++) {
+        pl.forEach(p => {
+          p.x = clamp(p.x + p.vx * h, MINX, MAXX);
+          p.vy += GRAV_P * h; p.y += p.vy * h;
+          if (p.y >= STAND) { p.y = STAND; p.vy = 0; }
+          const f = footTarget(p);
+          p.foot.vx = (f.x - p.foot.x) / h; p.foot.vy = (f.y - p.foot.y) / h; p.foot.x = f.x; p.foot.y = f.y;
+        });
+        // the two heads can't walk through each other
+        const a = pl[0], b = pl[1], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        if (d < HR * 2 && d > 0.001) {
+          const push = (HR * 2 - d) / 2, nx = dx / d, ny = dy / d;
+          a.x = clamp(a.x - nx * push, MINX, MAXX); b.x = clamp(b.x + nx * push, MINX, MAXX);
+          if (ny > 0.3) a.y = Math.min(STAND, a.y - ny * push); else if (ny < -0.3) b.y = Math.min(STAND, b.y + ny * push);
+        }
+        if (st === 'kickoff') continue;                              // ball waits in the air until the whistle
+
+        ball.vy += GRAV_B * h;
+        ball.x += ball.vx * h; ball.y += ball.vy * h;
+        ball.rot += ball.vx * h / BR;
+        // ground
+        if (ball.y > GROUND - BR) {
+          ball.y = GROUND - BR;
+          if (ball.vy > 0) { if (ball.vy > 160) api.sound.play('thud', ball.vy); ball.vy = ball.vy > 110 ? -ball.vy * 0.72 : 0; }
+          ball.vx *= Math.exp(-0.7 * h);                              // rolling friction
+        }
+        if (ball.y < BR) { ball.y = BR; ball.vy = Math.abs(ball.vy) * 0.8; }
+        // side walls (only above the goals; below the bars the ball is in the net)
+        const barTop = GROUND - GH - 10;
+        if (ball.x < BR && ball.y < barTop)     { ball.x = BR;     ball.vx =  Math.abs(ball.vx) * 0.8; api.sound.play('wall'); }
+        if (ball.x > W - BR && ball.y < barTop) { ball.x = W - BR; ball.vx = -Math.abs(ball.vx) * 0.8; api.sound.play('wall'); }
+        if (ball.x < BR)     { ball.x = BR;     ball.vx = Math.abs(ball.vx) * 0.3; }          // back of the net
+        if (ball.x > W - BR) { ball.x = W - BR; ball.vx = -Math.abs(ball.vx) * 0.3; }
+        hitRect(0, barTop, GW, 10, 0.7); hitRect(W - GW, barTop, GW, 10, 0.7);
+        if (st === 'play') {
+          // players: heads bump, feet kick
+          for (const p of pl) {
+            if (hitCircle(p.x, p.y, HR, p.vx, p.vy, 0.8)) api.sound.play('paddle');
+            const kicking = p.kickT > 0 && p.kickT > KICK_T * 0.25;
+            if (hitCircle(p.foot.x, p.foot.y, FR, p.foot.vx, p.foot.vy, kicking ? 1.15 : 0.55)) api.sound.play('kick');
+          }
+        }
+        const sp = Math.hypot(ball.vx, ball.vy);
+        if (sp > MAX_BALL) { ball.vx *= MAX_BALL / sp; ball.vy *= MAX_BALL / sp; }
+        // goals: the ball is inside the net, below the crossbar
+        if (st === 'play' && ball.y > GROUND - GH) {
+          if (ball.x < GW - 8)     { scored(1); continue; }
+          if (ball.x > W - GW + 8) { scored(0); continue; }
+        }
+      }
+    }
+
+    const game = {
+      reset() {
+        goals = [0, 0]; match = 1; golden = false; clock = MATCH_TIME; banner = null; intents = [{}, {}];
+        ai.speed = 200; ai.react = 0.3; ai.err = 60; ai.t = 0;
+        pad = makeTouchPad(api, buttonsFor(api.mode));
+        particles.clear(); api.setScores(0, 0); updateInfo();
+        kickoff();
+      },
+
+      update(dt) {
+        particles.update(dt);
+        if (st === 'kickoff') { stT -= dt; if (stT <= 0) { st = 'play'; api.sound.play('go'); } }
+        else if (st === 'goal') { stT -= dt; if (stT <= 0 && st === 'goal') kickoff(); }
+        else if (st === 'play') {
+          if (!golden) {
+            clock -= dt;
+            if (clock <= 0) {
+              clock = 0;
+              if (goals[0] !== goals[1]) { finish(goals[0] > goals[1] ? 0 : 1); return; }
+              golden = true; banner = 'Golden goal!'; stT = 0;                       // sudden death
+            }
+          }
+        }
+        step(dt);
+        if (banner && st === 'play' && !golden) banner = null;
+      },
+      idle(dt) { particles.update(dt); },
+
+      pointerdown(p, e) { pad.down(p, e); },
+      pointermove(p, e) { pad.move(p, e); },
+      pointerup(p, e) { pad.up(p, e); },
+      keydown(e, k) {                                                   // remember quick taps of jump / kick
+        if (solo()) { if (k === 'w' || k === 'arrowup') latch[0].j = true; if (['s', 'arrowdown', ' ', 'enter'].includes(k)) latch[0].k = true; }
+        else {
+          if (k === 'w') latch[0].j = true; if (k === 's' || k === ' ') latch[0].k = true;
+          if (k === 'arrowup') latch[1].j = true; if (k === 'arrowdown' || k === 'enter') latch[1].k = true;
+        }
+      },
+
+      draw(ctx) {
+        // night sky + stands
+        const sky = ctx.createLinearGradient(0, 0, 0, GROUND);
+        sky.addColorStop(0, '#1a1040'); sky.addColorStop(1, '#3a2380');
+        ctx.fillStyle = sky; ctx.fillRect(0, 0, W, PITCH);
+        for (let r = 0; r < 4; r++) for (let x = 0; x < W; x += 22) {          // little crowd dots
+          ctx.fillStyle = ['#ff4f6d', '#ffd93d', '#2ee6d6', '#8b6cff'][(x / 22 + r) % 4 | 0]; ctx.globalAlpha = 0.28;
+          ctx.beginPath(); ctx.arc(x + (r % 2) * 11 + 8, 190 + r * 24, 6, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+        // grass with stripes
+        for (let i = 0; i < 10; i++) { ctx.fillStyle = i % 2 ? '#1b8a4c' : '#1f9955'; ctx.fillRect(i * W / 10, GROUND, W / 10 + 1, PITCH - GROUND); }
+        ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(0, GROUND - 1, W, 3);
+        ctx.fillRect(W / 2 - 1, GROUND + 4, 3, PITCH - GROUND - 4);
+        // goals
+        for (const left of [true, false]) {
+          const x0 = left ? 0 : W - GW, y0 = GROUND - GH;
+          ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = 1;
+          for (let x = 0; x <= GW; x += 12) { ctx.beginPath(); ctx.moveTo(x0 + x, y0); ctx.lineTo(x0 + x, GROUND); ctx.stroke(); }
+          for (let y = 0; y <= GH; y += 12) { ctx.beginPath(); ctx.moveTo(x0, y0 + y); ctx.lineTo(x0 + GW, y0 + y); ctx.stroke(); }
+          ctx.fillStyle = '#fff'; ctx.fillRect(x0, y0 - 10, GW, 10);
+          ctx.fillRect(left ? GW - 4 : W - GW, y0 - 10, 4, GH + 10);
+        }
+        // players
+        pl.forEach((p, i) => {
+          ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(p.x, GROUND + 5, 40, 8, 0, 0, Math.PI * 2); ctx.fill();
+          // leg + shoe
+          ctx.strokeStyle = '#2a2145'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(p.x, p.y + HR * 0.7); ctx.lineTo(p.foot.x, p.foot.y); ctx.stroke();
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(p.foot.x, p.foot.y, FR, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = COL[i]; ctx.beginPath(); ctx.arc(p.foot.x + p.dir * 3, p.foot.y - 1, FR * 0.55, 0, Math.PI * 2); ctx.fill();
+          // jersey, head, hair
+          ctx.fillStyle = COL[i]; rr(ctx, p.x - 20, p.y + HR * 0.55, 40, 24, 10); ctx.fill();
+          ctx.fillStyle = SKIN[i]; ctx.beginPath(); ctx.arc(p.x, p.y, HR, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = COL[i]; ctx.beginPath(); ctx.arc(p.x, p.y, HR, Math.PI * 1.08, Math.PI * 1.92); ctx.closePath(); ctx.fill();   // headband / hair
+          // eyes follow the ball
+          const ax = ball.x - p.x, ay = ball.y - p.y, ad = Math.hypot(ax, ay) || 1;
+          for (const ex of [-0.34, 0.34]) {
+            const gx = p.x + p.dir * 6 + ex * HR * 0.9, gy = p.y - 2;
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(gx, gy, 9, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#150d2b'; ctx.beginPath(); ctx.arc(gx + ax / ad * 3.5, gy + ay / ad * 3.5, 4.2, 0, Math.PI * 2); ctx.fill();
+          }
+          // mouth: grins when its team just scored, otherwise a small line
+          ctx.strokeStyle = '#150d2b'; ctx.lineWidth = 3; ctx.beginPath();
+          if (st === 'goal' && banner && goals[i] > goals[1 - i]) ctx.arc(p.x + p.dir * 6, p.y + 12, 9, 0.1, Math.PI - 0.1);
+          else { ctx.moveTo(p.x + p.dir * 6 - 8, p.y + 17); ctx.lineTo(p.x + p.dir * 6 + 8, p.y + 17); }
+          ctx.stroke();
+        });
+        // ball: white with dark patches that spin
+        ctx.save(); ctx.translate(ball.x, ball.y); ctx.rotate(ball.rot);
+        ctx.shadowColor = 'rgba(255,255,255,.5)'; ctx.shadowBlur = 8;
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, BR, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        ctx.fillStyle = '#26203d';
+        ctx.beginPath(); for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(Math.cos(a) * 8, Math.sin(a) * 8); } ctx.closePath(); ctx.fill();
+        for (let k = 0; k < 5; k++) { const a = k / 5 * Math.PI * 2 - Math.PI / 2; ctx.beginPath(); ctx.arc(Math.cos(a) * 18, Math.sin(a) * 18, 4.5, 0, Math.PI * 2); ctx.fill(); }
+        ctx.restore();
+        particles.draw(ctx);
+        // scoreboard + clock
+        label(ctx, `${goals[0]}  :  ${goals[1]}`, W / 2, 40, 54, 'rgba(255,255,255,.9)');
+        label(ctx, golden ? 'GOLDEN GOAL' : `0:${String(Math.ceil(clock)).padStart(2, '0')}`, W / 2, 84, 22, golden ? '#ffd93d' : 'rgba(255,255,255,.7)');
+        if (st === 'kickoff') label(ctx, stT > 0.35 ? 'Get ready' : 'GO!', W / 2, 200, 44, '#fff', 'center', 0.85);
+        if (banner && st === 'goal') label(ctx, banner, W / 2, 200, 70, '#ffd93d');
+        // controls strip
+        ctx.fillStyle = '#150d2b'; ctx.fillRect(0, PITCH, W, H - PITCH);
+        pad.draw(ctx);
+        if (!api.isTouch()) {
+          const t = solo() ? ['A D  or  ← →  run      W  or  ↑  jump      S  /  Space  kick']
+            : ['Player 1:  A D run,  W jump,  S or Space kick', 'Player 2:  ← → run,  ↑ jump,  ↓ or Enter kick'];
+          t.forEach((s, n) => label(ctx, s, W / 2, PITCH + (t.length === 1 ? 55 : 40 + n * 34), 20, n === 1 ? COL[1] : (solo() ? '#fff' : COL[0]), 'center', 0.85));
+        }
+      },
+    };
+    return game;
+  },
+});
+
+
+/* ==========================================================================
+   7. Home page + router
+   ========================================================================== */
+const homeEl = $('#home');
+const gameViewEl = $('#gameView');
+let arena = null;
+let homeScroll = 0;
+let lastRandomId = null;
+
+const GROUPS = [
+  { id: 'balls', title: 'Bouncing ball games', note: 'Paddles, pegs and pile-ups.' },
+  { id: 'quick', title: 'Quick games',         note: 'Thirty seconds to learn, a lifetime to master.' },
+  { id: 'two',   title: 'Two players',         note: 'One screen, two people, bragging rights.' },
+];
+
+/** What the card shows under the description: your best score, or how many matches you've played. */
+function cardStatus(g) {
+  const best = Scores.get(g.id);
+  const unit = (g.scoring && g.scoring.unit) || '';
+  if (best > 0) return `<span>Best</span><b>${best}${unit}</b>`;
+  if (g.players === 2) {
+    const n = Plays.get(g.id);
+    if (n > 0) return `<span>Played</span><b>${n}</b>`;
+  }
+  return '<span>Not played yet</span>';
+}
+
+/** Build the card grid, grouped by section. Called every time we return home so scores stay fresh. */
+function renderGrid() {
+  const grid = $('#grid');
+  grid.innerHTML = '';
+  for (const grp of GROUPS) {
+    const list = GAMES.filter(g => g.group === grp.id);
+    if (!list.length) continue;
+    const head = document.createElement('li');
+    head.className = 'group-head';
+    head.innerHTML = `<h2>${grp.title}</h2><p>${grp.note}</p>`;
+    grid.appendChild(head);
+    for (const g of list) {
+      const tag = g.players === 2 ? '2 players' : g.players === 'both' ? '1–2 players' : '';
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a class="card" href="#/${g.id}" style="--c:${g.color}">
+          <span class="card-emoji" aria-hidden="true">${g.emoji}</span>
+          <span class="card-name">${g.name}</span>
+          <span class="card-desc">${g.blurb}</span>
+          <span class="card-foot">
+            <span class="card-best">${cardStatus(g)}</span>
+            ${tag ? `<span class="card-tag">${tag}</span>` : ''}
+          </span>
+        </a>`;
+      grid.appendChild(li);
+    }
+  }
+}
+
+/** The title is made of letter tiles; tapping one boings it and plays a note. */
+function buildWordmark() {
+  const mark = $('#wordmark');
+  const palette = ['--pink', '--orange', '--lemon', '--lime', '--cyan', '--violet', '--pink', '--orange', '--lemon', '--lime'];
+  const tilt = [-4, 3, -2, 4, -3, 3, -4, 2, -3, 4];
+  let n = 0;
+  for (const w of ['bored', 'games']) {
+    const word = document.createElement('span');
+    word.className = 'word';
+    word.setAttribute('aria-hidden', 'true');
+    for (const ch of w) {
+      const tile = document.createElement('span');
+      tile.className = 'tile';
+      tile.textContent = ch;
+      tile.dataset.i = n;
+      tile.style.setProperty('--c', `var(${palette[n]})`);
+      tile.style.setProperty('--r', `${tilt[n]}deg`);
+      word.appendChild(tile); n++;
+    }
+    mark.appendChild(word);
+  }
+  mark.addEventListener('pointerdown', e => {
+    const tile = e.target.closest('.tile');
+    if (!tile) return;
+    tile.classList.remove('boing'); void tile.offsetWidth; tile.classList.add('boing');
+    Sound.play('note', Number(tile.dataset.i));
+  });
+  mark.addEventListener('animationend', e => e.target.classList.remove('boing'));
+}
+
+function randomGame() {
+  const pool = GAMES.filter(g => g.id !== lastRandomId);
+  const g = pool.length ? pick(pool) : GAMES[0];
+  lastRandomId = g.id;
+  location.hash = `#/${g.id}`;
+}
+
+function closeArena() {
+  if (arena) { arena.destroy(); arena = null; }
+}
+
+function showHome() {
+  closeArena();
+  gameViewEl.hidden = true;
+  homeEl.hidden = false;
+  document.title = 'boredgames';
+  renderGrid();
+  window.scrollTo(0, homeScroll);
+}
+
+function showGame(def) {
+  closeArena();
+  if (!homeEl.hidden) homeScroll = window.scrollY;
+  homeEl.hidden = true;
+  gameViewEl.hidden = false;
+  document.title = `${def.name} · boredgames`;
+  window.scrollTo(0, 0);
+  arena = createArena(def, gameViewEl, { onExit: () => { location.hash = '#/'; } });
+}
+
+/** #/brick-breaker → that game; anything else → home. Works from a plain file:// page too. */
+function route() {
+  const id = location.hash.replace(/^#\/?/, '');
+  const def = GAMES.find(g => g.id === id);
+  def ? showGame(def) : showHome();
+}
+
+function boot() {
+  buildWordmark();
+  refreshMuteButtons();
+  $('#randomBtn').addEventListener('click', () => { Sound.play('click'); randomGame(); });
+  window.addEventListener('hashchange', route);
+  route();
+}
+boot();
+</script>
+</body>
+</html>
