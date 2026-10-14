@@ -3572,6 +3572,7 @@ const gameViewEl = $('#gameView');
 let arena = null;
 let homeScroll = 0;
 let lastRandomId = null;
+let currentId;                 // id of the game on screen, null for the home page (undefined until the first route)
 
 const GROUPS = [
   { id: 'balls', title: 'Bouncing ball games', note: 'Paddles, pegs and pile-ups.' },
@@ -3606,7 +3607,7 @@ function renderGrid() {
       const tag = g.players === 2 ? '2 players' : g.players === 'both' ? '1–2 players' : '';
       const li = document.createElement('li');
       li.innerHTML = `
-        <a class="card" href="#/${g.id}" style="--c:${g.color}">
+        <a class="card" href="#/${g.id}" data-id="${g.id}" style="--c:${g.color}">
           <span class="card-emoji" aria-hidden="true">${g.emoji}</span>
           <span class="card-name">${g.name}</span>
           <span class="card-desc">${g.blurb}</span>
@@ -3654,7 +3655,7 @@ function randomGame() {
   const pool = GAMES.filter(g => g.id !== lastRandomId);
   const g = pool.length ? pick(pool) : GAMES[0];
   lastRandomId = g.id;
-  location.hash = `#/${g.id}`;
+  navigate(g.id);
 }
 
 function closeArena() {
@@ -3663,6 +3664,7 @@ function closeArena() {
 
 function showHome() {
   closeArena();
+  currentId = null;
   gameViewEl.hidden = true;
   homeEl.hidden = false;
   document.title = 'boredgames';
@@ -3672,18 +3674,32 @@ function showHome() {
 
 function showGame(def) {
   closeArena();
+  currentId = def.id;
   if (!homeEl.hidden) homeScroll = window.scrollY;
   homeEl.hidden = true;
   gameViewEl.hidden = false;
   document.title = `${def.name} · boredgames`;
   window.scrollTo(0, 0);
-  arena = createArena(def, gameViewEl, { onExit: () => { location.hash = '#/'; } });
+  arena = createArena(def, gameViewEl, { onExit: () => navigate(null) });
+}
+
+/**
+ * Open a game (or the home page when id is null).
+ * The page is switched directly, so it works even where links and the address bar can't be relied on
+ * (embedded previews, sandboxed frames). The #/game-id hash is kept in sync when possible, which is what
+ * makes the browser's Back button and shareable links work.
+ */
+function navigate(id) {
+  const def = GAMES.find(g => g.id === id);
+  def ? showGame(def) : showHome();
+  try { location.hash = def ? `#/${def.id}` : '#/'; } catch (e) { /* no address bar to update: fine */ }
 }
 
 /** #/brick-breaker → that game; anything else → home. Works from a plain file:// page too. */
 function route() {
   const id = location.hash.replace(/^#\/?/, '');
   const def = GAMES.find(g => g.id === id);
+  if ((def ? def.id : null) === currentId) return;          // navigate() already showed it
   def ? showGame(def) : showHome();
 }
 
@@ -3691,6 +3707,14 @@ function boot() {
   buildWordmark();
   refreshMuteButtons();
   $('#randomBtn').addEventListener('click', () => { Sound.play('click'); randomGame(); });
+  // Cards are real links (so "open in new tab" works) but a plain click opens the game directly.
+  $('#grid').addEventListener('click', e => {
+    const card = e.target.closest('a.card');
+    if (!card || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    Sound.play('click');
+    navigate(card.dataset.id);
+  });
   window.addEventListener('hashchange', route);
   route();
 }
