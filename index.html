@@ -2705,8 +2705,9 @@ registerGame({
 /* --------------------------------------------------------------------------
    Light Cycles  (2 players)
    Two bikes leave glowing trails. Don't hit a wall, a trail, or each other:
-   the last bike running wins the round. Steering is relative: "left" always
-   turns left from the bike's point of view. First to 3 rounds wins.
+   the last bike running wins the round. Steer with four direction keys (or the
+   on-screen arrows): left always goes toward the left of the screen. A bike can't
+   reverse into itself. First to 3 rounds wins.
    -------------------------------------------------------------------------- */
 registerGame({
   id: 'light-cycles',
@@ -2716,7 +2717,7 @@ registerGame({
   color: '#ff4fa3',
   players: 2,
   blurb: 'Trap your friend behind your glowing trail.',
-  help: 'First to 3 rounds. Turn left or right from your bike’s point of view. Player 1 (pink, bottom): A and D, or the bottom buttons. Player 2 (cyan, top): ← and →, or the top buttons.',
+  help: 'First to 3 rounds. Steer toward the screen edge you want: left, up, down or right. Player 1 (pink, starts at the bottom): W A S D, or the bottom arrows. Player 2 (cyan, starts at the top): the arrow keys, or the top arrows.',
   size: [480, 640],
 
   create(api) {
@@ -2724,17 +2725,14 @@ registerGame({
     const COLS = 30, ROWS = 30, CS = 14, BX = 30, BY = 110, WIN_ROUNDS = 3;
     const DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];               // 0 up, 1 right, 2 down, 3 left
     const COL = ['#ff4fa3', '#2ee6d6'];
-    const pad = makeTouchPad(api, [
-      { id: 'p1l', x: 30,  y: 556, w: 200, h: 70, label: '◀', color: COL[0] },
-      { id: 'p1r', x: 250, y: 556, w: 200, h: 70, label: '▶', color: COL[0] },
-      { id: 'p2l', x: 250, y: 14,  w: 200, h: 70, label: '◀', color: COL[1], flip: true },   // upside down: left for the player across the table
-      { id: 'p2r', x: 30,  y: 14,  w: 200, h: 70, label: '▶', color: COL[1], flip: true },
-    ]);
+    // Four arrow buttons per player, in the same order and the same way up for both (left is the left of the screen).
+    const ARROWS = [['l', '◀', 3], ['u', '▲', 0], ['d', '▼', 2], ['r', '▶', 1]];       // [id suffix, label, direction]
+    const pad = makeTouchPad(api, [0, 1].flatMap(pl => ARROWS.map(([id, label], k) =>
+      ({ id: `p${pl + 1}${id}`, x: 30 + k * 110, y: pl === 0 ? 556 : 14, w: 100, h: 70, label, color: COL[pl] }))));
     const particles = makeParticles();
     let grid, bikes, phase, t, stepT, steps, wins, banner, round;
 
     const idx = (x, y) => y * COLS + x;
-    const turn = (d, side) => (d + (side < 0 ? 3 : 1)) % 4;
 
     function startRound() {
       grid = new Uint8Array(COLS * ROWS);
@@ -2747,10 +2745,15 @@ registerGame({
       api.setInfo(`Round ${round}`);
     }
 
-    const queueTurn = (i, side) => { const q = bikes[i].q; if (phase !== 'done' && q.length < 2) q.push(side); };
+    /** Ask bike i to head in direction d (0 up, 1 right, 2 down, 3 left). Straight on and U-turns are ignored. */
+    function queueDir(i, d) {
+      const b = bikes[i], last = b.q.length ? b.q[b.q.length - 1] : b.d;
+      if (phase === 'done' || b.q.length >= 2 || d === last || d === (last + 2) % 4) return;
+      b.q.push(d);                                              // up to two queued, so a quick pair of taps makes a tight turn
+    }
 
     function step() {
-      bikes.forEach(b => { if (b.q.length) b.d = turn(b.d, b.q.shift()); });
+      bikes.forEach(b => { if (b.q.length) b.d = b.q.shift(); });
       const next = bikes.map(b => ({ x: b.x + DX[b.d], y: b.y + DY[b.d] }));
       const dead = next.map(n => n.x < 0 || n.y < 0 || n.x >= COLS || n.y >= ROWS || grid[idx(n.x, n.y)] !== 0);
       if (!dead[0] && !dead[1] && next[0].x === next[1].x && next[0].y === next[1].y) dead[0] = dead[1] = true;   // head-on
@@ -2774,7 +2777,7 @@ registerGame({
 
       update(dt) {
         particles.update(dt);
-        for (const [id, i, s] of [['p1l', 0, -1], ['p1r', 0, 1], ['p2l', 1, -1], ['p2r', 1, 1]]) if (pad.pressed(id)) queueTurn(i, s);
+        for (const pl of [0, 1]) for (const [id, , dir] of ARROWS) if (pad.pressed(`p${pl + 1}${id}`)) queueDir(pl, dir);
         if (phase === 'count') {
           const before = Math.ceil(t); t -= dt;
           if (Math.ceil(t) !== before && t > 0) api.sound.play('beep');
@@ -2792,8 +2795,9 @@ registerGame({
       pointermove(p, e) { pad.move(p, e); },
       pointerup(p, e) { pad.up(p, e); },
       keydown(e, k) {
-        if (k === 'a') queueTurn(0, -1); else if (k === 'd') queueTurn(0, 1);
-        else if (k === 'arrowleft') queueTurn(1, -1); else if (k === 'arrowright') queueTurn(1, 1);
+        const p1 = { w: 0, d: 1, s: 2, a: 3 }[k], p2 = { arrowup: 0, arrowright: 1, arrowdown: 2, arrowleft: 3 }[k];
+        if (p1 !== undefined) queueDir(0, p1);
+        if (p2 !== undefined) queueDir(1, p2);
       },
 
       draw(ctx) {
@@ -2819,8 +2823,8 @@ registerGame({
         particles.draw(ctx);
         pad.draw(ctx);
         if (!api.isTouch()) {                                     // keyboard reminders where the touch buttons would be
-          labelFlip(ctx, 'Player 1:  A  D', W / 2, H - 60, 22, COL[0], false, 0.8);
-          labelFlip(ctx, 'Player 2:  ←  →', W / 2, 54, 22, COL[1], true, 0.8);
+          label(ctx, 'Player 1:  W A S D', W / 2, H - 60, 22, COL[0], 'center', 0.8);
+          label(ctx, 'Player 2:  arrow keys', W / 2, 54, 22, COL[1], 'center', 0.8);
         }
         if (phase === 'count') label(ctx, t > 0.5 ? String(Math.ceil(t - 0.5)) : 'GO!', W / 2, BY + ROWS * CS / 2, 100, '#fff');
         if (phase === 'done') { ctx.fillStyle = 'rgba(14,8,32,.65)'; ctx.fillRect(BX, BY + 170, COLS * CS, 80); label(ctx, banner, W / 2, BY + 210, 30, '#ffd93d'); }
